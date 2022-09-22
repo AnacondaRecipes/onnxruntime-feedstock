@@ -43,6 +43,8 @@ requirements:
     - packaging
     - sympy >=1.10
     - pybind11
+    - git
+    - patch  # [unix]
   host:
     - pip
     - wheel
