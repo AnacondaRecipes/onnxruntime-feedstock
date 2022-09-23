@@ -35,38 +35,36 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - cmake
-    - ninja
-    - libprotobuf 3.19.1
-    - numpy
-    - setuptools
-    - cerberus
-    - packaging
-    - sympy >=1.10
-    - pybind11
     - git
+    - libprotobuf 3.19.1
+    - ninja
     - patch  # [unix]
+    - pybind11
   host:
-    - pip
-    - wheel
-    - python
     - boost_mp11
+    - cerberus
     - flake8
     - flatbuffers !=2.0.6
     - gmock
     - gtest
     - libdate
+    - libprotobuf 3.19.1
+    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
+    # We need to statically link protobuf until we link against a system libonnx
+    - libprotobuf-static 3.19.1
+    - nsync
+    - numpy
+    - optional-lite
+    - packaging
+    - pip
+    - pybind11
+    - python
     - python-flatbuffers
     - re2
-    - optional-lite
-    - nsync
-    - libprotobuf 3.19.1
-    # We need to statically link protobuf until we link against a system libonnx
-    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
-    - libprotobuf-static 3.19.1
-    - numpy
-    - pybind11
     - safeint
     - setuptools
+    - sympy >=1.10
+    - wheel
   run:
     - coloredlogs
     - packaging
@@ -92,6 +90,7 @@ about:
   doc_url: https://onnxruntime.ai/docs/
   summary: cross-platform, high performance ML inferencing and training accelerator
   license: MIT
+  license_family: MIT
   license_file:
     - LICENSE
     - cmake/external/onnx/LICENSE

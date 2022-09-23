@@ -56,7 +56,8 @@ if [ "$(uname)" == "Darwin" ]; then
         --config Release \
         --update \
         --build \
-        --skip_submodule_sync
+        --skip_submodule_sync \
+        --parallel
 else
     ${PYTHON} tools/ci_build/build.py \
         --enable_lto \
@@ -68,7 +69,8 @@ else
         --config Release \
         --update \
         --build \
-        --skip_submodule_sync
+        --skip_submodule_sync \
+        --parallel
 fi
 
 cp build-ci/Release/dist/onnxruntime-*.whl onnxruntime-${PKG_VERSION}-py3-none-any.whl
