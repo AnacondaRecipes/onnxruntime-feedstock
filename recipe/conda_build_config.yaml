@@ -7,3 +7,7 @@ CONDA_BUILD_SYSROOT:       # [osx and x86_64]
 suffix:
   - ""
   - "-novec"
+cxx_compiler:              # [win]
+- vs2019                   # [win]
+c_compiler:                # [win]
+- vs2019                   # [win]

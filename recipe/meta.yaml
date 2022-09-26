@@ -24,6 +24,13 @@ source:
   - url: https://github.com/nlohmann/json/archive/refs/tags/v3.10.5.tar.gz
     sha256: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
     folder: json
+  - url: https://github.com/google/googletest/archive/703bd9caab50b139428cea1aaff9974ebee5742e.tar.gz  # [win]
+    sha256: d17b1b83a57b3933565a6d0616fe261107326d47de20288d0949ed038e1c342d  # [win]
+    folder: googletest  # [win]
+  - url: https://github.com/microsoft/wil/archive/e8c599bca6c56c44b6730ad93f6abbc9ecd60fc1.tar.gz
+    sha256: 388156309853aaa6e01d177f9b68bd2c6943e5fc073ac6786f9383c1b4438812
+    folder: wil
+
 build:
   number: 0
   skip: True # [s390x or ppc64le]
@@ -35,38 +42,39 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - cmake
-    - ninja
-    - libprotobuf 3.19.1
-    - numpy
-    - setuptools
-    - cerberus
-    - packaging
-    - sympy >=1.10
-    - pybind11
     - git
+    - libprotobuf # [not win]
+    - posix  # [win]
+    - ninja
     - patch  # [unix]
+    - m2-patch  # [win]
+    - pybind11
   host:
-    - pip
-    - wheel
-    - python
     - boost_mp11
+    - cerberus
     - flake8
     - flatbuffers !=2.0.6
     - gmock
     - gtest
     - libdate
+    - libprotobuf 3.19.1   # [not win]
+    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
+    # We need to statically link protobuf until we link against a system libonnx
+    - libprotobuf-static 3.19.1
+    - nlohmann_json  # [win]
+    - nsync
+    - numpy
+    - optional-lite
+    - packaging
+    - pip
+    - pybind11
+    - python
     - python-flatbuffers
     - re2
-    - optional-lite
-    - nsync
-    - libprotobuf 3.19.1
-    # We need to statically link protobuf until we link against a system libonnx
-    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
-    - libprotobuf-static 3.19.1
-    - numpy
-    - pybind11
     - safeint
     - setuptools
+    - sympy >=1.10
+    - wheel
   run:
     - coloredlogs
     - packaging
@@ -92,6 +100,7 @@ about:
   doc_url: https://onnxruntime.ai/docs/
   summary: cross-platform, high performance ML inferencing and training accelerator
   license: MIT
+  lisense_family: MIT
   license_file:
     - LICENSE
     - cmake/external/onnx/LICENSE
