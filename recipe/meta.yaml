@@ -24,6 +24,10 @@ source:
   - url: https://github.com/nlohmann/json/archive/refs/tags/v3.10.5.tar.gz
     sha256: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
     folder: json
+  - url: https://github.com/microsoft/wil/archive/e8c599bca6c56c44b6730ad93f6abbc9ecd60fc1.tar.gz  # [win]
+    sha256: 388156309853aaa6e01d177f9b68bd2c6943e5fc073ac6786f9383c1b4438812 # [win]
+    folder: wil # [win]
+
 build:
   number: 0
   skip: True # [s390x or ppc64le]
@@ -36,9 +40,11 @@ requirements:
     - {{ compiler('cxx') }}
     - cmake
     - git
-    - libprotobuf 3.19.1
+    - libprotobuf 3.19.1 # [not win]
+    - libprotobuf # [win]
     - ninja
-    - patch  # [unix]
+    - patch    # [unix]
+    - m2-patch # [win]
     - pybind11
   host:
     - boost_mp11
@@ -48,10 +54,12 @@ requirements:
     - gmock
     - gtest
     - libdate
-    - libprotobuf 3.19.1
+    - libprotobuf 3.19.1         # [not win]
+    - libprotobuf                # [win]
     # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
     # We need to statically link protobuf until we link against a system libonnx
-    - libprotobuf-static 3.19.1
+    - libprotobuf-static 3.19.1  # [not win]
+    - libprotobuf-static         # [win]
     - nsync
     - numpy
     - optional-lite
