@@ -40,8 +40,7 @@ requirements:
     - {{ compiler('cxx') }}
     - cmake
     - git
-    - libprotobuf 3.19.1 # [not win]
-    - libprotobuf # [win]
+    - libprotobuf 3.20.1
     - ninja
     - patch    # [unix]
     - m2-patch # [win]
@@ -54,12 +53,9 @@ requirements:
     - gmock
     - gtest
     - libdate
-    - libprotobuf 3.19.1         # [not win]
-    - libprotobuf                # [win]
     # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
     # We need to statically link protobuf until we link against a system libonnx
-    - libprotobuf-static 3.19.1  # [not win]
-    - libprotobuf-static         # [win]
+    - libprotobuf-static 3.20.1
     - nsync
     - numpy
     - optional-lite

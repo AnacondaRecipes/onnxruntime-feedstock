@@ -1,4 +1,4 @@
-t a/tools/ci_build/build.py b/tools/ci_build/build.py
+diff --git a/tools/ci_build/build.py b/tools/ci_build/build.py
 index 79314f345..ec58a7642 100644
 --- a/tools/ci_build/build.py
 +++ b/tools/ci_build/build.py
