@@ -34,8 +34,9 @@ set CMAKE_EXTRA_DEFINES= "Protobuf_SRC_ROOT_FOLDER=%LIBRARY_PREFIX%\lib\pkgconfi
 %PYTHON% tools\ci_build\build.py --build_dir build-ci --config Release --update --build --skip_submodule_sync --build_wheel --parallel --enable_lto --use_full_protobuf --cmake_extra_defines %CMAKE_EXTRA_DEFINES%
 if errorlevel 1 exit 1
 
-xcopy build-ci\Release\Release\dist\onnxruntime-*.whl onnxruntime-%PKG_VERSION%-py3-none-any.whl
+xcopy /S /Y /F build-ci\Release\Release\dist\onnxruntime-*.whl onnxruntime-%PKG_VERSION%-py3-none-any.whl*
 if errorlevel 1 exit 1
 
-%PYTHON%  -m pip install onnxruntime-%PKG_VERSION%-py3-none-any.whl
+%PYTHON% -m pip install onnxruntime-%PKG_VERSION%-py3-none-any.whl
 if errorlevel 1 exit 1
+rem Exiting...
