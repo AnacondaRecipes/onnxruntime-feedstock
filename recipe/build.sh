@@ -31,6 +31,7 @@ cmake_extra_defines=( "Protobuf_PROTOC_EXECUTABLE=$BUILD_PREFIX/bin/protoc" \
                       "onnxruntime_USE_COREML=OFF" \
                       "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
                       "onnxruntime_BUILD_SHARED_LIB=ON" \
+                      "onnxruntime_BUILD_UNIT_TESTS=OFF" \
                       "CMAKE_PREFIX_PATH=$PREFIX" )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
