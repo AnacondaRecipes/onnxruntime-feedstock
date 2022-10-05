@@ -15,7 +15,6 @@ do
     mv "${external_dir}" "${dest}"
 done
 
-
 pushd "${external_root}/SafeInt/safeint"
 ln -s $PREFIX/include/SafeInt.hpp
 popd
@@ -31,6 +30,8 @@ cmake_extra_defines=( "Protobuf_PROTOC_EXECUTABLE=$BUILD_PREFIX/bin/protoc" \
                       "onnxruntime_PREFER_SYSTEM_LIB=ON" \
                       "onnxruntime_USE_COREML=OFF" \
                       "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
+                      "onnxruntime_BUILD_SHARED_LIB=ON" \
+                      "onnxruntime_BUILD_UNIT_TESTS=OFF" \
                       "CMAKE_PREFIX_PATH=$PREFIX" )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
@@ -44,18 +45,34 @@ do
     fi
 done
 
-
-python tools/ci_build/build.py \
-    --enable_lto \
-    --build_dir build-ci \
-    --use_full_protobuf \
-    --cmake_extra_defines "${cmake_extra_defines[@]}" \
-    --cmake_generator Ninja \
-    --build_wheel \
-    --config Release \
-    --update \
-    --build \
-    --skip_submodule_sync
+if [ "$(uname)" == "Darwin" ]; then
+    ${PYTHON} tools/ci_build/build.py \
+        --enable_lto \
+        --osx_arch "$(uname -m)" \
+        --build_dir build-ci \
+        --use_full_protobuf \
+        --cmake_extra_defines "${cmake_extra_defines[@]}" \
+        --cmake_generator Ninja \
+        --build_wheel \
+        --config Release \
+        --update \
+        --build \
+        --skip_submodule_sync \
+        --parallel
+else
+    ${PYTHON} tools/ci_build/build.py \
+        --enable_lto \
+        --build_dir build-ci \
+        --use_full_protobuf \
+        --cmake_extra_defines "${cmake_extra_defines[@]}" \
+        --cmake_generator Ninja \
+        --build_wheel \
+        --config Release \
+        --update \
+        --build \
+        --skip_submodule_sync \
+        --parallel
+fi
 
 cp build-ci/Release/dist/onnxruntime-*.whl onnxruntime-${PKG_VERSION}-py3-none-any.whl
-python -m pip install onnxruntime-${PKG_VERSION}-py3-none-any.whl
+${PYTHON} -m pip install onnxruntime-${PKG_VERSION}-py3-none-any.whl

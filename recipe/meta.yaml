@@ -1,6 +1,5 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.12.0" %}
-
+{% set version = "1.12.1" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}
@@ -8,10 +7,11 @@ package:
 
 source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: de3b79ead1aa6387fe2828f0f94239c98cb4f08b4b6855219872aac19f07a5e3
+    sha256: 302e5a0f368c7d048a9acd1227ac226148ed9c944f8b67d1077ca1b3bb3dcc5b
     patches:
       - 0001_dont_vectorize.patch
       - 0002_use_system_nsync.patch
+      - 0003_dont_download_deps.patch
   - url: https://github.com/onnx/onnx/archive/f7ee1ac60d06abe8e26c9b6bbe1e3db5286b614b.tar.gz
     sha256: 0624860bc300fada6c0f2b5fd18043528bd0e149aad9b3c329d478ab185f17d3
     folder: onnx
@@ -24,44 +24,51 @@ source:
   - url: https://github.com/nlohmann/json/archive/refs/tags/v3.10.5.tar.gz
     sha256: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
     folder: json
+  - url: https://github.com/microsoft/wil/archive/e8c599bca6c56c44b6730ad93f6abbc9ecd60fc1.tar.gz  # [win]
+    sha256: 388156309853aaa6e01d177f9b68bd2c6943e5fc073ac6786f9383c1b4438812 # [win]
+    folder: wil # [win]
+
 build:
   number: 0
-  skip: true  # [win]
-  # Since 1.11, power9 seems to be required.
-  skip: true  # [ppc64le]
+  skip: True # [s390x or ppc64le]
+  ignore_run_exports_from:
+    - libprotobuf
 
 requirements:
   build:
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
-    - pybind11                               # [build_platform != target_platform]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - cmake
+    - git
+    - libprotobuf 3.20.1
     - ninja
-    - libprotobuf
+    - patch    # [unix]
+    - m2-patch # [win]
+    - pybind11
   host:
-    - python
-    - pip
-    - wheel
     - boost_mp11
+    - cerberus
     - flake8
     - flatbuffers !=2.0.6
     - gmock
     - gtest
     - libdate
+    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
+    # We need to statically link protobuf until we link against a system libonnx
+    - libprotobuf-static 3.20.1
+    - nsync
+    - numpy
+    - optional-lite
+    - packaging
+    - pip
+    - pybind11
+    - python
     - python-flatbuffers
     - re2
-    - optional-lite
-    - nsync
-    - libprotobuf
-    # We need to statically link protobuf until we link against a system libonnx
-    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
-    - libprotobuf-static
-    - numpy
-    - pybind11
     - safeint
+    - setuptools
+    - sympy >=1.10
+    - wheel
   run:
     - coloredlogs
     - packaging
@@ -82,9 +89,12 @@ test:
     - pip
 
 about:
-  home: https://github.com/microsoft/onnxruntime/
+  home: https://onnxruntime.ai/
+  dev_url: https://github.com/microsoft/onnxruntime/
+  doc_url: https://onnxruntime.ai/docs/
   summary: cross-platform, high performance ML inferencing and training accelerator
   license: MIT
+  license_family: MIT
   license_file:
     - LICENSE
     - cmake/external/onnx/LICENSE
