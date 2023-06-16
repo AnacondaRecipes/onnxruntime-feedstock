@@ -1,3 +1,0 @@
-# the conda-build parameters to use for disabling overlinking check
-build_parameters:
-  - ""

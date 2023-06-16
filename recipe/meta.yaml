@@ -1,5 +1,5 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.12.1" %}
+{% set version = "1.15.0" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}
@@ -7,67 +7,40 @@ package:
 
 source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: 302e5a0f368c7d048a9acd1227ac226148ed9c944f8b67d1077ca1b3bb3dcc5b
-    patches:
-      - 0001_dont_vectorize.patch
-      - 0002_use_system_nsync.patch
-      - 0003_dont_download_deps.patch
-  - url: https://github.com/onnx/onnx/archive/f7ee1ac60d06abe8e26c9b6bbe1e3db5286b614b.tar.gz
-    sha256: 0624860bc300fada6c0f2b5fd18043528bd0e149aad9b3c329d478ab185f17d3
-    folder: onnx
-  - url: https://gitlab.com/libeigen/eigen/-/archive/d10b27fe37736d2944630ecd7557cefa95cf87c9/eigen-d10b27fe37736d2944630ecd7557cefa95cf87c9.tar.gz
-    sha256: a3c10a8c14f55e9f09f98b0a0ac6874c21bda91f65b7469d9b1f6925990e867b
-    folder: eigen
-  - url: https://github.com/pytorch/cpuinfo/archive/5916273f79a21551890fd3d56fc5375a78d1598d.zip
-    sha256: 2a160c527d3c58085ce260f34f9e2b161adc009b34186a2baf24e74376e89e6d
-    folder: pytorch_cpuinfo
-  - url: https://github.com/nlohmann/json/archive/refs/tags/v3.10.5.tar.gz
-    sha256: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
-    folder: json
-  - url: https://github.com/microsoft/wil/archive/e8c599bca6c56c44b6730ad93f6abbc9ecd60fc1.tar.gz  # [win]
-    sha256: 388156309853aaa6e01d177f9b68bd2c6943e5fc073ac6786f9383c1b4438812 # [win]
-    folder: wil # [win]
+    sha256: 7752defd687138870974aa391bd5d3d16228ee449f408d11ea3716e8585c73b4
 
 build:
   number: 0
-  skip: True # [s390x or ppc64le]
+  skip: True # [ppc64le or win]
   ignore_run_exports_from:
-    - libprotobuf
+    - zlib
 
 requirements:
   build:
+    - python
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - cmake
     - git
-    - libprotobuf 3.20.1
     - ninja
-    - patch    # [unix]
-    - m2-patch # [win]
     - pybind11
+    - numpy 1.21.5   # [py<310]
+    - numpy   # [py>=310]
   host:
-    - boost_mp11
-    - cerberus
-    - flake8
-    - flatbuffers !=2.0.6
-    - gmock
-    - gtest
-    - libdate
-    # See: https://github.com/conda-forge/onnxruntime-feedstock/issues/5
-    # We need to statically link protobuf until we link against a system libonnx
-    - libprotobuf-static 3.20.1
-    - nsync
-    - numpy
-    - optional-lite
-    - packaging
-    - pip
-    - pybind11
     - python
+    - pip
+    - wheel
+    - flake8
+    - gmock
+    - libdate
+    - packaging
     - python-flatbuffers
-    - re2
-    - safeint
+    - optional-lite
+    - zlib
+    - numpy 1.21.5 # [py<310]
+    - numpy # [py>=310]
+    - pybind11
     - setuptools
-    - sympy >=1.10
     - wheel
   run:
     - coloredlogs
@@ -93,7 +66,12 @@ about:
   dev_url: https://github.com/microsoft/onnxruntime/
   doc_url: https://onnxruntime.ai/docs/
   summary: cross-platform, high performance ML inferencing and training accelerator
-  license: MIT
+  description: |
+    ONNX Runtime is a cross-platform machine-learning model accelerator,
+    with a flexible interface to integrate hardware-specific libraries.
+    ONNX Runtime can be used with models from PyTorch, Tensorflow/Keras,
+    TFLite, scikit-learn, and other frameworks.
+  license: MIT AND BSL-1.0
   license_family: MIT
   license_file:
     - LICENSE
@@ -104,3 +82,4 @@ extra:
     - xhochy
     - janjagusch
     - jtilly
+    - cbourjau
