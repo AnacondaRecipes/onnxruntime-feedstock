@@ -1,5 +1,5 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.15.0" %}
+{% set version = "1.15.1" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}
@@ -7,11 +7,11 @@ package:
 
 source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: 7752defd687138870974aa391bd5d3d16228ee449f408d11ea3716e8585c73b4
+    sha256: 93a9b6f148639938ccbaa48d0f641d8f33312fdfcc69ee9466e11362b43917c4
 
 build:
   number: 0
-  skip: True # [ppc64le or win]
+  skip: True # [py>310]
   ignore_run_exports_from:
     - zlib
 
@@ -26,6 +26,7 @@ requirements:
     - pybind11
     - numpy 1.21.5   # [py<310]
     - numpy   # [py>=310]
+    - libprotobuf 3.20.3
   host:
     - python
     - pip
@@ -58,6 +59,7 @@ test:
     - onnxruntime
   commands:
     - pip check
+    - onnxruntime_test --help
   requires:
     - pip
 
