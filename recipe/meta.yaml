@@ -11,10 +11,11 @@ source:
 
 build:
   number: 0
-  skip: True # [py>310]
+  skip: True # [py>310 or ppc64le]
   ignore_run_exports_from:
     - zlib
-
+  entry_points:
+    - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
 requirements:
   build:
     - python
