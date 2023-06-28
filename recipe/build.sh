@@ -8,18 +8,6 @@ else
     DONT_VECTORIZE="OFF"
 fi
 
-if [[ "${CONDA_BUILD_CROSS_COMPILATION:-0}" == '1' ]]; then
-    BUILD_UNIT_TESTS="OFF"
-else
-    BUILD_UNIT_TESTS="ON"
-fi
-
-if [[ "${CONDA_BUILD_CROSS_COMPILATION:-0}" == '1' ]]; then
-    RUN_TESTS_BUILD_PY_OPTIONS=""
-else
-    RUN_TESTS_BUILD_PY_OPTIONS="--test"
-fi
-
 if [[ "${target_platform:-other}" == 'osx-arm64' ]]; then
     OSX_ARCH="arm64"
 else
@@ -31,7 +19,7 @@ cmake_extra_defines=( "EIGEN_MPL2_ONLY=ON" \
 	              "onnxruntime_USE_COREML=OFF" \
                       "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
                       "onnxruntime_BUILD_SHARED_LIB=ON" \
-                      "onnxruntime_BUILD_UNIT_TESTS=$BUILD_UNIT_TESTS" \
+                      "onnxruntime_BUILD_UNIT_TESTS=OFF" \
                       "CMAKE_PREFIX_PATH=$PREFIX"
 		    )
 
@@ -47,7 +35,8 @@ do
 done
 
 
-python tools/ci_build/build.py \
+${PYTHON} tools/ci_build/build.py \
+    --allow_running_as_root \
     --compile_no_warning_as_error \
     --enable_lto \
     --build_dir build-ci \
@@ -56,11 +45,10 @@ python tools/ci_build/build.py \
     --build_wheel \
     --config Release \
     --update \
-    --build ${RUN_TESTS_BUILD_PY_OPTIONS} \
+    --build \
     --skip_submodule_sync \
     --osx_arch $OSX_ARCH \
-    --path_to_protoc_exe $BUILD_PREFIX/bin/protoc
 
 
 cp build-ci/Release/dist/onnxruntime-*.whl onnxruntime-${PKG_VERSION}-py3-none-any.whl
-python -m pip install onnxruntime-${PKG_VERSION}-py3-none-any.whl
+${PYTHON} -m pip install onnxruntime-${PKG_VERSION}-py3-none-any.whl
