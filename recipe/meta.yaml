@@ -32,7 +32,7 @@ requirements:
     - ninja     # [not win]
     - pybind11
     - numpy 1.21.5   # [py<310]
-    - numpy   # [py>=310]
+    - numpy   # [py>=310] 
   host:
     - python
     - pip
