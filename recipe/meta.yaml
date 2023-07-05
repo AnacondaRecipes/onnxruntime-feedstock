@@ -17,7 +17,7 @@ source:
 
 build:
   number: 0
-  skip: True # [py>310 or ppc64le or s390x]
+  skip: True # [py>310]
   ignore_run_exports_from:
     - zlib
   entry_points:
@@ -32,7 +32,7 @@ requirements:
     - ninja     # [not win]
     - pybind11
     - numpy 1.21.5   # [py<310]
-    - numpy   # [py>=310] 
+    - numpy   # [py>=310]
   host:
     - python
     - pip
