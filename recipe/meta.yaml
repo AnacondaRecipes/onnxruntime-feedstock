@@ -12,7 +12,7 @@ source:
       - never_call_install_python_deps.patch
     #   Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
       - windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
-    #   - 16337.patch
+      - 16337.patch
     #   Workaround for https://github.com/microsoft/onnxruntime/issues/13225
 
 build:
