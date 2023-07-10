@@ -22,6 +22,9 @@ build:
     - zlib
   entry_points:
     - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
+  missing_dso_whitelist:
+    - api-ms-win-core-path-l1-1-0.dll
+    
 requirements:
   build:
     - python
@@ -59,8 +62,6 @@ requirements:
     - {{ pin_compatible('numpy') }}
   run_constrained:
     - onnxruntime <0a0  # [suffix == "-novec"]
-  missing_dso_whitelist:
-  - api-ms-win-core-path-l1-1-0.dll
 
 test:
   imports:
