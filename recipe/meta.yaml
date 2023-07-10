@@ -23,8 +23,8 @@ build:
   entry_points:
     - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
   missing_dso_whitelist:
-    - api-ms-win-core-path-l1-1-0.dll
-    
+    - **/api-ms-win-core-path-l1-1-0.dll
+
 requirements:
   build:
     - python
