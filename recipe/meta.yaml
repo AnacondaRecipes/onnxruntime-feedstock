@@ -34,21 +34,22 @@ requirements:
     - git  # [not win]
     - ninja     # [not win64]
     - pybind11
-    - numpy 1.21.5   # [py<310]
-    - numpy   # [py>=310]
+    - numpy {{ numpy }
   host:
     - python
     - pip
     - wheel
     - flake8
     - gmock
+    - patch    # [unix]
+    - m2-patch # [win]
     - libdate
     - packaging
     - python-flatbuffers
     - optional-lite
     - zlib
-    - numpy 1.21.5 # [py<310]
-    - numpy # [py>=310]
+    - zstd {{ zstd }}
+    - numpy {{ numpy }
     - pybind11
     - setuptools
     - wheel
@@ -59,6 +60,7 @@ requirements:
     - python
     - python-flatbuffers
     - sympy
+    - zstd
     - {{ pin_compatible('numpy') }}
   run_constrained:
     - onnxruntime <0a0  # [suffix == "-novec"]
