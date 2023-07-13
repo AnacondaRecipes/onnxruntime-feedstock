@@ -33,8 +33,6 @@ requirements:
     - cmake
     - git  # [not win]
     - ninja     # [not win64]
-    - pybind11
-    - numpy {{ numpy }
   host:
     - python
     - pip
