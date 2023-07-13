@@ -47,7 +47,7 @@ requirements:
     - optional-lite
     - zlib
     - zstd {{ zstd }}
-    - numpy {{ numpy }
+    - numpy {{ numpy }}
     - pybind11
     - setuptools
     - wheel
