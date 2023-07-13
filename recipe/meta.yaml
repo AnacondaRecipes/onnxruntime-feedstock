@@ -33,14 +33,14 @@ requirements:
     - cmake
     - git  # [not win]
     - ninja     # [not win64]
+    - patch    # [unix]
+    - m2-patch # [win]
   host:
     - python
     - pip
     - wheel
     - flake8
     - gmock
-    - patch    # [unix]
-    - m2-patch # [win]
     - libdate
     - packaging
     - python-flatbuffers
