@@ -31,7 +31,7 @@ requirements:
     - {{ compiler('cxx') }}
     - cmake
     - git  # [not win]
-    - ninja     # [not win64]
+    - ninja     # [not win]
     - patch    # [unix]
     - m2-patch # [win]
   host:
