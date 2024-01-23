@@ -20,7 +20,8 @@ cmake_extra_defines=( "EIGEN_MPL2_ONLY=ON" \
                       "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
                       "onnxruntime_BUILD_SHARED_LIB=ON" \
                       "onnxruntime_BUILD_UNIT_TESTS=OFF" \
-                      "CMAKE_PREFIX_PATH=$PREFIX"
+                      "CMAKE_PREFIX_PATH=$PREFIX" \
+                      "CMAKE_CUDA_ARCHITECTURES=all-major"
 		    )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
@@ -34,6 +35,13 @@ do
     fi
 done
 
+if [[ "${ep_variant:-}" == "cuda" ]]; then
+    export CUDAHOSTCXX="${CXX}"                # If this isn't included, CUDA will use the system compiler to compile host
+                                                # files, rather than the one in the conda environment, resulting in compiler errors
+    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling"
+else
+    CUDA_ARGS=""
+fi
 
 ${PYTHON} tools/ci_build/build.py \
     --allow_running_as_root \
@@ -48,7 +56,13 @@ ${PYTHON} tools/ci_build/build.py \
     --build \
     --skip_submodule_sync \
     --osx_arch $OSX_ARCH \
+    $CUDA_ARGS
 
+if [[ "${ep_variant:-}" == "cuda" ]]; then
+    WHL_BASE_NAME="onnxruntime_gpu"
+else
+    WHL_BASE_NAME="onnxruntime"
+fi
 
-cp build-ci/Release/dist/onnxruntime-*.whl onnxruntime-${PKG_VERSION}-py3-none-any.whl
-${PYTHON} -m pip install onnxruntime-${PKG_VERSION}-py3-none-any.whl
+cp build-ci/Release/dist/${WHL_BASE_NAME}-*.whl ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
+${PYTHON} -m pip install ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
