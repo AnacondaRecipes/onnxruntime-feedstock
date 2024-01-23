@@ -34,6 +34,9 @@ do
     fi
 done
 
+if [[ "${ep_variant}" == "cuda" ]]; then
+    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX}"
+fi
 
 ${PYTHON} tools/ci_build/build.py \
     --allow_running_as_root \
@@ -48,6 +51,7 @@ ${PYTHON} tools/ci_build/build.py \
     --build \
     --skip_submodule_sync \
     --osx_arch $OSX_ARCH \
+    $CUDA_ARGS
 
 
 cp build-ci/Release/dist/onnxruntime-*.whl onnxruntime-${PKG_VERSION}-py3-none-any.whl

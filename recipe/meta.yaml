@@ -17,12 +17,16 @@ source:
 build:
   number: 0
   skip: True # [ppc64le or s390x]
+  string: gpu_cuda{{ cudatoolkit | replace('.', '') }}py{{ CONDA_PY }}h{{PKG_HASH}}_{{ PKG_BUILDNUM }}  # [(ep_variant == "cuda") and (linux and x86_64)]
   ignore_run_exports_from:
     - zlib
   entry_points:
     - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
   missing_dso_whitelist:     # [win]
     - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
+    # CUDA runtime libraries are provided by a platform install for our cuda 11.8
+    - "**/libcuda.so*"            # [(ep_variant == "cuda") and (linux and x86_64)]
+    - "**/libc10_cuda.so"         # [(ep_variant == "cuda") and (linux and x86_64)]
 
 requirements:
   build:
@@ -50,6 +54,9 @@ requirements:
     - pybind11
     - setuptools
     - wheel
+    # GPU requirements
+    - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
+    - cudnn {{ cudnn }}*              # [(ep_variant == "cuda") and (linux and x86_64)]
   run:
     - coloredlogs
     - packaging
