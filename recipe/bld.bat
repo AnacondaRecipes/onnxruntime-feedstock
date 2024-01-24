@@ -10,6 +10,10 @@
     --config Release ^
     --update ^
     --build ^
+    --test ^
+    --enable_onnx_tests ^
+    --fuzz_testing ^
+    --enable_symbolic_shape_infer_tests ^
     --skip_submodule_sync
 if errorlevel 1 exit 1
 
