@@ -37,7 +37,7 @@ done
 if [[ "${ep_variant}" == "cuda" ]]; then
     export CUDAHOSTCXX="${CXX}"                # If this isn't included, CUDA will use the system compiler to compile host
                                                 # files, rather than the one in the conda environment, resulting in compiler errors
-    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX}"
+    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling"
 fi
 
 ${PYTHON} tools/ci_build/build.py \

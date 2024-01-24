@@ -57,6 +57,7 @@ requirements:
     # GPU requirements
     - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
     - cudnn {{ cudnn }}*              # [(ep_variant == "cuda") and (linux and x86_64)]
+    - cupti {{ cudatoolkit }}*        # [(ep_variant == "cuda") and (linux and x86_64)]
   run:
     - coloredlogs
     - packaging
