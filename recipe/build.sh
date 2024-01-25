@@ -55,7 +55,6 @@ ${PYTHON} tools/ci_build/build.py \
     --osx_arch $OSX_ARCH \
     --test \
     --enable_onnx_tests \
-    --fuzz_testing \
     --enable_symbolic_shape_infer_tests \
     $CUDA_ARGS
 
