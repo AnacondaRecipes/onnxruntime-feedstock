@@ -59,6 +59,10 @@ ${PYTHON} tools/ci_build/build.py \
     --enable_symbolic_shape_infer_tests \
     $CUDA_ARGS
 
-
-cp build-ci/Release/dist/onnxruntime-*.whl onnxruntime-${PKG_VERSION}-py3-none-any.whl
-${PYTHON} -m pip install onnxruntime-${PKG_VERSION}-py3-none-any.whl
+if [[ "${ep_variant}" == "cuda" ]]; then
+    WHL_BASE_NAME="onnxruntime_gpu"
+else
+    WHL_BASE_NAME="onnxruntime"
+fi
+cp dist/${WHL_BASE_NAME}-*.whl ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
+${PYTHON} -m pip install ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
