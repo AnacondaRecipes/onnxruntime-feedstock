@@ -10,8 +10,11 @@ source:
     sha256: 88335a1ccbccccb35d5d3aaadee090a9745cf90d97ca87c4a3ac5c4b694b7b17
     patches:
       - patches/never_call_install_python_deps.patch
-    #   Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
+      # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
       - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
+      - patches/skip_onnx_dependent_tests.patch
+      - patches/skip_moe_test.patch                                                # [(ep_variant == "cuda")]
+      - patches/skip_custom_op_test_with_cuda.patch                                # [(ep_variant == "cuda")]
 
 build:
   number: 0
@@ -53,6 +56,9 @@ requirements:
     - pybind11
     - setuptools
     - wheel
+    # sympy and pytest are required to run tests
+    - sympy
+    - pytest
     # GPU requirements
     - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
     - cudnn {{ cudnn }}*              # [(ep_variant == "cuda") and (linux and x86_64)]

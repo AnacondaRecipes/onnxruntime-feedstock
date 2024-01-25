@@ -19,7 +19,7 @@ cmake_extra_defines=( "EIGEN_MPL2_ONLY=ON" \
 	              "onnxruntime_USE_COREML=OFF" \
                       "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
                       "onnxruntime_BUILD_SHARED_LIB=ON" \
-                      "onnxruntime_BUILD_UNIT_TESTS=OFF" \
+                      "onnxruntime_BUILD_UNIT_TESTS=ON" \
                       "CMAKE_PREFIX_PATH=$PREFIX" \
                       "CMAKE_CUDA_ARCHITECTURES=all-major"
 		    )
@@ -56,6 +56,7 @@ ${PYTHON} tools/ci_build/build.py \
     --build \
     --skip_submodule_sync \
     --osx_arch $OSX_ARCH \
+    --test \
     $CUDA_ARGS
 
 if [[ "${ep_variant:-}" == "cuda" ]]; then
