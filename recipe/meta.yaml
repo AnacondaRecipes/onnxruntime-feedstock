@@ -53,10 +53,11 @@ requirements:
     - numpy {{ numpy }}
     - pybind11
     - setuptools
-    # onnx and sympy are required to run tests
+    - wheel
+    # onnx, sympy, pytest are required to run tests
     - onnx
     - sympy
-    - wheel
+    - pytest
     # GPU requirements
     - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
     - cudnn {{ cudnn }}*              # [(ep_variant == "cuda") and (linux and x86_64)]
