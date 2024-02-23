@@ -54,6 +54,7 @@ ${PYTHON} tools/ci_build/build.py \
     --skip_submodule_sync \
     --osx_arch $OSX_ARCH \
     --test \
+    --use_cache \
     $CUDA_ARGS
 
 if [[ "${ep_variant}" == "cuda" ]]; then
