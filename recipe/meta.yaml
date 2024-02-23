@@ -15,6 +15,7 @@ source:
       - patches/skip_onnx_dependent_tests.patch
       - patches/skip_moe_test.patch                                                # [(ep_variant == "cuda")]
       - patches/skip_custom_op_test_with_cuda.patch                                # [(ep_variant == "cuda")]
+      - patches/fix_cwd_name_on_win.patch                                          # [win]
 
 build:
   number: 0

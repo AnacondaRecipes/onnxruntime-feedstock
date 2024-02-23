@@ -1,0 +1,20 @@
+These lines seem to be very legacy code, and doubles what is done in the start
+of the function, resulting in a NotADirectoryError on Windows.
+
+Lines originally introduced in https://github.com/microsoft/onnxruntime/commit/89618e8f1e8fee0354de57494bb71da96a445b71
+
+Index: onnxruntime/tools/ci_build/build.py
+===================================================================
+--- onnxruntime.orig/tools/ci_build/build.py
++++ onnxruntime/tools/ci_build/build.py
+@@ -1995,8 +1995,8 @@ def run_onnxruntime_tests(args, source_d
+             if is_reduced_ops_build(args) or args.minimal_build is not None:
+                 return
+ 
+-            if is_windows():
+-                cwd = os.path.join(cwd, config)
++            # if is_windows():
++            #     cwd = os.path.join(cwd, config)
+ 
+             run_subprocess(
+                 [sys.executable, "onnxruntime_test_python.py"], cwd=cwd, dll_path=dll_path, python_path=python_path
