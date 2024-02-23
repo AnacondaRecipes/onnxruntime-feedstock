@@ -71,6 +71,9 @@ requirements:
     - sympy
     - zstd
     - {{ pin_compatible('numpy') }}
+    # GPU requirements
+    - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
+    - cupti {{ cudatoolkit }}*        # [(ep_variant == "cuda") and (linux and x86_64)]
   run_constrained:
     - onnxruntime <0a0  # [suffix == "-novec"]
 
