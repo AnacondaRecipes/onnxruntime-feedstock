@@ -9,10 +9,9 @@ source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
     sha256: 54e909392b81cbbae7243024fbb9eba0a7cba0674eb0adc9068566c23b0a57bb
     patches:
-      - never_call_install_python_deps.patch
-    #   Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
-      - windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
-      - 16337.patch
+      - patches/never_call_install_python_deps.patch
+      # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
+      - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
 
 build:
   number: 0
