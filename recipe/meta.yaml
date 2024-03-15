@@ -46,20 +46,18 @@ requirements:
     - pip
     - wheel
     - flake8
-    - gmock
-    - libdate
     - packaging
     - python-flatbuffers
-    - optional-lite
-    - zlib
+    - zlib 1.2.13
     - zstd {{ zstd }}
     - numpy {{ numpy }}
-    - pybind11
+    - pybind11 2.10.4
     - setuptools
     - wheel
-    # sympy and pytest are required to run tests
+    # sympy, pytest and gmock are required to run tests
     - sympy
     - pytest
+    - gmock
     # GPU requirements
     - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
     - cudnn {{ cudnn }}*              # [(ep_variant == "cuda") and (linux and x86_64)]
@@ -71,7 +69,6 @@ requirements:
     - python
     - python-flatbuffers
     - sympy
-    - zstd
     - {{ pin_compatible('numpy') }}
     # GPU requirements
     - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
