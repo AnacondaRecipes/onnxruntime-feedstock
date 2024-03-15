@@ -66,4 +66,4 @@ else
 fi
 
 cp build-ci/Release/dist/${WHL_BASE_NAME}-*.whl ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
-${PYTHON} -m pip install ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
+${PYTHON} -m pip install ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl --no-deps --no-build-isolation -v

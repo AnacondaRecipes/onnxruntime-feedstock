@@ -18,6 +18,6 @@ if errorlevel 1 exit 1
 xcopy /S /Y /F build-ci\Release\dist\onnxruntime-*.whl onnxruntime-%PKG_VERSION%-py3-none-any.whl*
 if errorlevel 1 exit 1
 
-%PYTHON% -m pip install onnxruntime-%PKG_VERSION%-py3-none-any.whl
+%PYTHON% -m pip install onnxruntime-%PKG_VERSION%-py3-none-any.whl  --no-deps --no-build-isolation -v
 if errorlevel 1 exit 1
 rem Exiting...
