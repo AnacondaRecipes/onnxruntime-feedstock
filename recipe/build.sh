@@ -65,5 +65,6 @@ else
     WHL_BASE_NAME="onnxruntime"
 fi
 
-cp build-ci/Release/dist/${WHL_BASE_NAME}-*.whl ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl
-${PYTHON} -m pip install ${WHL_BASE_NAME}-${PKG_VERSION}-py3-none-any.whl --no-deps --no-build-isolation -v
+for whl_file in build-ci/Release/dist/${WHL_BASE_NAME}*.whl; do
+    ${PYTHON} -m pip install "$whl_file" --no-deps --no-build-isolation -v
+done

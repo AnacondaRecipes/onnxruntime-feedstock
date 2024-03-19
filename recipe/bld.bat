@@ -15,9 +15,8 @@
     --skip_submodule_sync
 if errorlevel 1 exit 1
 
-xcopy /S /Y /F build-ci\Release\dist\onnxruntime-*.whl onnxruntime-%PKG_VERSION%-py3-none-any.whl*
-if errorlevel 1 exit 1
-
-%PYTHON% -m pip install onnxruntime-%PKG_VERSION%-py3-none-any.whl  --no-deps --no-build-isolation -v
-if errorlevel 1 exit 1
-rem Exiting...
+:: In theory there should be only one wheel
+for %%F in (build-ci\Release\dist\onnxruntime*.whl) do (
+    %PYTHON% -m pip install %%F --no-deps --no-build-isolation -v
+    if errorlevel 1 exit 1
+)
