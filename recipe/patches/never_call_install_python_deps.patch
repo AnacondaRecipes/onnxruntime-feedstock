@@ -1,0 +1,17 @@
+Index: onnxruntime/tools/ci_build/build.py
+===================================================================
+--- onnxruntime.orig/tools/ci_build/build.py	2024-02-23 14:57:45.263748229 -0600
++++ onnxruntime/tools/ci_build/build.py	2024-02-23 15:26:50.133707349 -0600
+@@ -2730,10 +2730,10 @@
+             if args.arm or args.arm64:
+                 raise BuildError("Only Windows ARM(64) cross-compiled builds supported currently through this script")
+             if not is_docker() and not args.use_acl and not args.use_armnn:
+-                install_python_deps()
++                pass
+ 
+         if args.enable_pybind and is_windows():
+-            install_python_deps(args.numpy_version)
++            pass
+ 
+         if args.use_rocm and args.rocm_version is None:
+             args.rocm_version = ""
