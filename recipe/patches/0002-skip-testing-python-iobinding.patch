@@ -1,0 +1,29 @@
+From 3605ec6abfd0b0d75290bbde0d4232d0f7e6d6d1 Mon Sep 17 00:00:00 2001
+From: Brian Wing <bwing@anaconda.com>
+Date: Wed, 11 Dec 2024 21:26:25 -0500
+Subject: [PATCH] Skip testing python iobinding
+
+These tests require onnx, and including onnx as a conda package pulls in protobuf, which interferes with the build (especially on windows, where it breaks the build), because protobuf is vendored in.
+---
+ tools/ci_build/build.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/tools/ci_build/build.py b/tools/ci_build/build.py
+index 384569997b..3f21b003c7 100644
+--- a/tools/ci_build/build.py
++++ b/tools/ci_build/build.py
+@@ -2108,9 +2108,9 @@ def run_onnxruntime_tests(args, source_dir, ctest_path, build_dir, configs):
+                 )
+ 
+             # For CUDA or DML enabled builds test IOBinding feature
+-            if args.use_cuda or args.use_dml:
+-                log.info("Testing IOBinding feature")
+-                run_subprocess([sys.executable, "onnxruntime_test_python_iobinding.py"], cwd=cwd, dll_path=dll_path)
++            # if args.use_cuda or args.use_dml:
++            #     log.info("Testing IOBinding feature")
++            #     run_subprocess([sys.executable, "onnxruntime_test_python_iobinding.py"], cwd=cwd, dll_path=dll_path)
+ 
+             if args.use_cuda:
+                 log.info("Testing CUDA Graph feature")
+-- 
+2.39.5 (Apple Git-154)
