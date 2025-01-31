@@ -39,6 +39,7 @@ if [[ "${ep_variant:-}" == "cuda" ]]; then
     export CUDAHOSTCXX="${CXX}"                # If this isn't included, CUDA will use the system compiler to compile host
                                                 # files, rather than the one in the conda environment, resulting in compiler errors
     CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling"
+    cmake_extra_defines+=('CUDAToolkit_INCLUDE_DIR="${PREFIX}/targets/x86_64-linux/include/"')
 else
     CUDA_ARGS=""
 fi
@@ -47,6 +48,7 @@ ${PYTHON} tools/ci_build/build.py \
     --allow_running_as_root \
     --compile_no_warning_as_error \
     --enable_lto \
+    --enable_pybind \
     --build_dir build-ci \
     --cmake_extra_defines "${cmake_extra_defines[@]}" \
     --cmake_generator Ninja \
@@ -54,6 +56,7 @@ ${PYTHON} tools/ci_build/build.py \
     --config Release \
     --update \
     --build \
+    --parallel \
     --skip_submodule_sync \
     --osx_arch $OSX_ARCH \
     --test \

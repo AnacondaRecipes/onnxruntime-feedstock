@@ -1,5 +1,5 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.17.1" %}
+{% set version = "1.20.1" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}
@@ -7,72 +7,69 @@ package:
 
 source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: 88335a1ccbccccb35d5d3aaadee090a9745cf90d97ca87c4a3ac5c4b694b7b17
+    sha256: d4c005506a2bbf88a838b14f8d1578406b8be2fb64abb50beeff908fb272529e
     patches:
-      - patches/never_call_install_python_deps.patch
+      - patches/dont-call-pip-on-win.patch                                  # [win]
       # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
       - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
-      - patches/skip_onnx_dependent_tests.patch
-      - patches/skip_moe_test.patch                                                # [(ep_variant == "cuda")]
-      - patches/skip_custom_op_test_with_cuda.patch                                # [(ep_variant == "cuda")]
-      - patches/fix_cwd_name_on_win.patch                                          # [win]
+      - patches/0001-remove-broken-cuda-moe-test-case.patch                 # [(ep_variant == "cuda")]
+      - patches/0002-skip-testing-python-iobinding.patch                    # [(ep_variant == "cuda")]
+      - patches/skip_custom_op_test_with_cuda.patch                         # [(ep_variant == "cuda")]
+      - patches/fix_cwd_name_on_win.patch                                   # [win]
 
 build:
   number: 0
-  skip: True # [ppc64le or s390x]
-  string: gpu_cuda{{ cudatoolkit | replace('.', '') }}py{{ CONDA_PY }}h{{PKG_HASH}}_{{ PKG_BUILDNUM }}  # [(ep_variant == "cuda") and (linux and x86_64)]
+  skip: True  # [s390x]
+  string: gpu_cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{PKG_HASH}}_{{ PKG_BUILDNUM }}  # [(ep_variant == "cuda")]
   ignore_run_exports_from:
     - zlib
   entry_points:
     - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
   missing_dso_whitelist:
     - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
-    # CUDA runtime libraries are provided by a platform install for our cuda 11.8
-    - "**/libcuda.so*"            # [(ep_variant == "cuda") and (linux and x86_64)]
-    - "**/libc10_cuda.so"         # [(ep_variant == "cuda") and (linux and x86_64)]
 
 requirements:
   build:
     - python
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }} # [(ep_variant == "cuda")]
     - cmake
-    - git  # [not win]
+    - git       # [not win]
     - ninja     # [not win]
-    - patch    # [unix]
-    - m2-patch # [win]
+    - patch     # [unix and (ep_variant == "cuda")]
+    - m2-patch  # [win]
   host:
     - python
     - pip
     - wheel
-    - flake8
     - packaging
     - python-flatbuffers
-    - zlib 1.2.13
-    - zstd {{ zstd }}
-    - numpy {{ numpy }}
-    - pybind11 2.10.4
-    - setuptools
-    - wheel
-    # sympy, pytest and gmock are required to run tests
-    - sympy
-    - pytest
-    - gmock
+    - zlib {{ zlib }}
+    - numpy 2.0  # [py<313]
+    - numpy 2.1  # [py>=313]
+    - pybind11 2.13
     # GPU requirements
-    - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
-    - cudnn {{ cudnn }}*              # [(ep_variant == "cuda") and (linux and x86_64)]
-    - cupti {{ cudatoolkit }}*        # [(ep_variant == "cuda") and (linux and x86_64)]
+    - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
+    - cuda-nvrtc-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
+    # Needed for CUDA profiling.                   # [(ep_variant == "cuda")]
+    - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cudnn 9.1.1.17*                              # [(ep_variant == "cuda")]
+    - libcublas-dev                                # [(ep_variant == "cuda")]
+    - libcufft-dev                                 # [(ep_variant == "cuda")]
+    - libcurand-dev                                # [(ep_variant == "cuda")]
+    - libcusparse-dev                              # [(ep_variant == "cuda")]
   run:
+    - __cuda  # [linux and (ep_variant == "cuda")]
     - coloredlogs
+    # numpy 2.0 sets the min pin to 1.19 and 2.1 sets 1.21 but upstream requires at least 1.21.6
+    - numpy >=1.21.6,<3
     - packaging
     - protobuf
     - python
     - python-flatbuffers
     - sympy
-    - {{ pin_compatible('numpy') }}
-    # GPU requirements
-    - cudatoolkit {{ cudatoolkit }}*  # [(ep_variant == "cuda") and (linux and x86_64)]
-    - cupti {{ cudatoolkit }}*        # [(ep_variant == "cuda") and (linux and x86_64)]
   run_constrained:
     - onnxruntime <0a0  # [suffix == "-novec"]
 
