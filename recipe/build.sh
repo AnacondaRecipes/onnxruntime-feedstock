@@ -14,22 +14,23 @@ else
     OSX_ARCH="x86_64"
 fi
 
-cmake_extra_defines=( "EIGEN_MPL2_ONLY=ON" \
-		      "FLATBUFFERS_BUILD_FLATC=OFF" \
-	              "onnxruntime_USE_COREML=OFF" \
-                      "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
-                      "onnxruntime_BUILD_SHARED_LIB=ON" \
-                      "onnxruntime_BUILD_UNIT_TESTS=ON" \
-                      "CMAKE_PREFIX_PATH=$PREFIX" \
-                      "CMAKE_CUDA_ARCHITECTURES=all-major"
-		    )
+cmake_extra_defines=(   "EIGEN_MPL2_ONLY=ON" \
+		                "FLATBUFFERS_BUILD_FLATC=OFF" \
+	                    "onnxruntime_USE_COREML=OFF" \
+                        "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
+                         "onnxruntime_BUILD_SHARED_LIB=ON" \
+                        "onnxruntime_BUILD_UNIT_TESTS=ON" \
+                         "CMAKE_PREFIX_PATH=$PREFIX" \
+                         "CMAKE_CUDA_ARCHITECTURES=all-major" \
+                         "onnxruntime_USE_PREINSTALLED_EIGEN=ON"
+		            )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
 # into --cmake_extra_defines.
 read -a CMAKE_ARGS_ARRAY <<< "${CMAKE_ARGS}"
 for cmake_arg in "${CMAKE_ARGS_ARRAY[@]}"
 do
-    if [[ "${cmake_arg}" == -DCMAKE_SYSTEM_* ]]; then
+    if [[ "${cmake_arg}" == -DCMAKE_* ]]; then
         # Strip -D prefix
         cmake_extra_defines+=( "${cmake_arg#"-D"}" )
     fi
@@ -44,8 +45,9 @@ else
     CUDA_ARGS=""
 fi
 
+echo "${cmake_extra_defines[@]}"
+
 ${PYTHON} tools/ci_build/build.py \
-    --allow_running_as_root \
     --compile_no_warning_as_error \
     --enable_lto \
     --enable_pybind \

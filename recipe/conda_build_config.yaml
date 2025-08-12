@@ -11,6 +11,6 @@ c_compiler:                # [win]
 suffix:
   - ""
   - "-novec"
-# for now we don't have a CUDA CI worker; uncomment the below to build for a CUDA execution provider (manually)
-#ep_variant:
-#  - cuda
+ep_variant:
+  - cpu
+  - cuda                   # [linux64 or win64]
