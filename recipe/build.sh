@@ -60,8 +60,8 @@ ${PYTHON} tools/ci_build/build.py \
     --build \
     --parallel \
     --skip_submodule_sync \
-    --osx_arch $OSX_ARCH \
     --test \
+    --allow_running_as_root \
     $CUDA_ARGS
 
 if [[ "${ep_variant:-}" == "cuda" ]]; then

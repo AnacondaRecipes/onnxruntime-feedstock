@@ -82,17 +82,16 @@ requirements:
   run_constrained:
     - onnxruntime <0a0  # [suffix == "-novec"]
 
-test:
-  imports:
-    - onnxruntime
-  commands:
-    - pip check
-    - onnxruntime_test --help
-  requires:
-    - pip
-
 outputs:
   - name: onnxruntime{{ suffix }}
+    test:
+      imports:
+        - onnxruntime
+      commands:
+        - pip check
+        - onnxruntime_test --help
+      requires:
+        - pip
   - name: onnxruntime{{ suffix }}-cpp
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
@@ -135,9 +134,9 @@ outputs:
         - call .\run_cpp_test.bat  # [win]
 
 about:
-  home: https://onnxruntime.ai/
-  dev_url: https://github.com/microsoft/onnxruntime/
-  doc_url: https://onnxruntime.ai/docs/
+  home: https://onnxruntime.ai
+  dev_url: https://github.com/microsoft/onnxruntime
+  doc_url: https://onnxruntime.ai/docs
   summary: cross-platform, high performance ML inferencing and training accelerator
   description: |
     ONNX Runtime is a cross-platform machine-learning model accelerator,
