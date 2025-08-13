@@ -8,10 +8,10 @@ else
     DONT_VECTORIZE="OFF"
 fi
 
-if [[ "${target_platform:-other}" == 'osx-arm64' ]]; then
-    OSX_ARCH="arm64"
+if [[ "$(uname -s)" == "Linux" ]]; then
+    OS_SPECIFIC_ARGS="--allow_running_as_root"
 else
-    OSX_ARCH="x86_64"
+    OS_SPECIFIC_ARGS=""
 fi
 
 cmake_extra_defines=(   "EIGEN_MPL2_ONLY=ON" \
@@ -61,7 +61,7 @@ ${PYTHON} tools/ci_build/build.py \
     --parallel \
     --skip_submodule_sync \
     --test \
-    --allow_running_as_root \
+    $OS_SPECIFIC_ARGS \
     $CUDA_ARGS
 
 if [[ "${ep_variant:-}" == "cuda" ]]; then
