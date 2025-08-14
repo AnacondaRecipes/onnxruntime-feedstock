@@ -47,9 +47,9 @@ requirements:
     - ninja     # [not win]
   host:
     # GPU requirements
-    # - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
+    - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
     # Needed for CUDA profiling.                   # [(ep_variant == "cuda")]
-    # - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
     # - cudnn 9.1.1.17*                              # [(ep_variant == "cuda")]
   
     - python
