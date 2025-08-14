@@ -22,8 +22,8 @@ build:
   number: 0
   skip: true  # [py<310]
   # temporary to not clog up the CI
-  # skip: true  # [(ep_variant == "cpu")]
-  # skip: true  # [py>310]
+  skip: true  # [(ep_variant == "cpu")]
+  skip: true  # [py>310]
   # string: gpu_cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{PKG_HASH}}_{{ PKG_BUILDNUM }}  # [(ep_variant == "cuda")]
   string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
   ignore_run_exports_from:
