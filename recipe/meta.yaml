@@ -9,13 +9,13 @@ source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
     sha256: 08b078eb7afbf376064b2b0f1781e3d78151cac0592988a0c0ec78bf72fde810
     patches:
-      - patches/dont-call-pip-on-win.patch                                  # [win]
+      # - patches/dont-call-pip-on-win.patch                                  # [win]
       # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
-      - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
-      - patches/0001-remove-broken-cuda-moe-test-case.patch                 # [(ep_variant == "cuda")]
-      - patches/0002-skip-testing-python-iobinding.patch                    # [(ep_variant == "cuda")]
-      - patches/skip_custom_op_test_with_cuda.patch                         # [(ep_variant == "cuda")]
-      - patches/fix_cwd_name_on_win.patch                                   # [win]
+      # - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
+      # - patches/0001-remove-broken-cuda-moe-test-case.patch                 # [(ep_variant == "cuda")]
+      # - patches/0002-skip-testing-python-iobinding.patch                    # [(ep_variant == "cuda")]
+      # - patches/skip_custom_op_test_with_cuda.patch                         # [(ep_variant == "cuda")]
+      # - patches/fix_cwd_name_on_win.patch                                   # [win]
       - patches/fix-eigen-hash.patch
 
 build:
