@@ -2,6 +2,8 @@
 
 set -exuo pipefail
 
+find ${PREFIX} -name nvcc
+
 if [[ "${PKG_NAME}" == 'onnxruntime-novec' ]]; then
     DONT_VECTORIZE="ON"
 else
@@ -14,15 +16,14 @@ else
     OS_SPECIFIC_ARGS=""
 fi
 
-cmake_extra_defines=(   "EIGEN_MPL2_ONLY=ON" \
-		                "FLATBUFFERS_BUILD_FLATC=OFF" \
-	                    "onnxruntime_USE_COREML=OFF" \
-                        "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
-                         "onnxruntime_BUILD_SHARED_LIB=ON" \
-                        "onnxruntime_BUILD_UNIT_TESTS=ON" \
-                         "CMAKE_PREFIX_PATH=$PREFIX" \
-                         "CMAKE_CUDA_ARCHITECTURES=all-major" \
-                         "onnxruntime_USE_PREINSTALLED_EIGEN=ON"
+cmake_extra_defines=("EIGEN_MPL2_ONLY=ON" \
+		             "FLATBUFFERS_BUILD_FLATC=OFF" \
+	                 "onnxruntime_USE_COREML=OFF" \
+                     "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
+                     "onnxruntime_BUILD_SHARED_LIB=ON" \
+                     "onnxruntime_BUILD_UNIT_TESTS=ON" \
+                     "CMAKE_PREFIX_PATH=$PREFIX" \
+                     "CMAKE_CUDA_ARCHITECTURES=all-major"
 		            )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
