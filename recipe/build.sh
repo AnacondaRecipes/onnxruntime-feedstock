@@ -59,7 +59,7 @@ ${PYTHON} tools/ci_build/build.py \
     --config Release \
     --update \
     --build \
-    --parallel \
+    --parallel 0 \
     --skip_submodule_sync \
     --test \
     $OS_SPECIFIC_ARGS \

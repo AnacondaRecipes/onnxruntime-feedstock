@@ -23,7 +23,7 @@ if "%ep_variant%" == "cuda" (
     --config Release ^
     --update ^
     --build ^
-    --parallel ^
+    --parallel 0 ^
     --test ^
     --skip_submodule_sync ^
     %CUDA_ARGS%
