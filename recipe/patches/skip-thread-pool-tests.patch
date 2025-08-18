@@ -1,14 +1,10 @@
 diff --git a/onnxruntime/test/global_thread_pools/test_inference.cc b/onnxruntime/test/global_thread_pools/test_inference.cc
-index c6d9585..e202c08 100644
+index c6d9585..396000a 100644
 --- a/onnxruntime/test/global_thread_pools/test_inference.cc
 +++ b/onnxruntime/test/global_thread_pools/test_inference.cc
-@@ -281,6 +281,6 @@ TEST_P(CApiTestGlobalThreadPoolsWithProvider, simple3) {
-   }
- }
+@@ -283,4 +283,4 @@ TEST_P(CApiTestGlobalThreadPoolsWithProvider, simple3) {
  
--INSTANTIATE_TEST_SUITE_P(CApiTestGlobalThreadPoolsWithProviders,
--                         CApiTestGlobalThreadPoolsWithProvider,
+ INSTANTIATE_TEST_SUITE_P(CApiTestGlobalThreadPoolsWithProviders,
+                          CApiTestGlobalThreadPoolsWithProvider,
 -                         ::testing::Values(0, 1, 2, 3, 4));
-+// INSTANTIATE_TEST_SUITE_P(CApiTestGlobalThreadPoolsWithProviders,
-+//                          CApiTestGlobalThreadPoolsWithProvider,
-+//                          ::testing::Values(0, 1, 2, 3, 4));
++                         ::testing::Values(0));
