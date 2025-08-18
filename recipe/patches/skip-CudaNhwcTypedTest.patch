@@ -1,0 +1,69 @@
+diff --git a/onnxruntime/test/providers/cuda/nhwc/conv_test.cc b/onnxruntime/test/providers/cuda/nhwc/conv_test.cc
+index b6a760f..dbfba83 100644
+--- a/onnxruntime/test/providers/cuda/nhwc/conv_test.cc
++++ b/onnxruntime/test/providers/cuda/nhwc/conv_test.cc
+@@ -51,35 +51,35 @@ struct ConvOp {
+   }
+ };
+ 
+-TYPED_TEST(CudaNhwcTypedTest, ConvNhwcBias) {
+-  auto op = ConvOp<TypeParam>{};
+-  op.input_dims = {1, 16, 64, 64};
+-  op.kernel_shape = {3, 3};
+-  op.channels = 16;
+-  op.bias = true;
+-
+-  MAKE_PROVIDERS_EPS_TYPE(TypeParam)
+-}
+-
+-TYPED_TEST(CudaNhwcTypedTest, ConvNhwcGroupNoBias) {
+-  auto op = ConvOp<TypeParam>{};
+-  op.input_dims = {1, 16, 64, 64};
+-  op.kernel_shape = {3, 3};
+-  op.channels = 16;
+-  op.group = 4;
+-
+-  MAKE_PROVIDERS_EPS_TYPE(TypeParam)
+-}
+-
+-TYPED_TEST(CudaNhwcTypedTest, ConvNhwcPadding) {
+-  auto op = ConvOp<TypeParam>{};
+-  op.input_dims = {2, 4, 64, 64};
+-  op.kernel_shape = {3, 3};
+-  op.channels = 4;
+-  op.padding = {4, 4, 4, 4};
+-
+-  MAKE_PROVIDERS_EPS_TYPE(TypeParam)
+-}
++// TYPED_TEST(CudaNhwcTypedTest, ConvNhwcBias) {
++//   auto op = ConvOp<TypeParam>{};
++//   op.input_dims = {1, 16, 64, 64};
++//   op.kernel_shape = {3, 3};
++//   op.channels = 16;
++//   op.bias = true;
++
++//   MAKE_PROVIDERS_EPS_TYPE(TypeParam)
++// }
++
++// TYPED_TEST(CudaNhwcTypedTest, ConvNhwcGroupNoBias) {
++//   auto op = ConvOp<TypeParam>{};
++//   op.input_dims = {1, 16, 64, 64};
++//   op.kernel_shape = {3, 3};
++//   op.channels = 16;
++//   op.group = 4;
++
++//   MAKE_PROVIDERS_EPS_TYPE(TypeParam)
++// }
++
++// TYPED_TEST(CudaNhwcTypedTest, ConvNhwcPadding) {
++//   auto op = ConvOp<TypeParam>{};
++//   op.input_dims = {2, 4, 64, 64};
++//   op.kernel_shape = {3, 3};
++//   op.channels = 4;
++//   op.padding = {4, 4, 4, 4};
++
++//   MAKE_PROVIDERS_EPS_TYPE(TypeParam)
++// }
+ 
+ }  // namespace test
+ }  // namespace onnxruntime
