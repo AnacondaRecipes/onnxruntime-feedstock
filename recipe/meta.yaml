@@ -17,6 +17,7 @@ source:
       - patches/skip-onnxruntime_test_python.patch        # [(ep_variant == "cuda")]
       - patches/0002-skip-testing-python-iobinding.patch  # [(ep_variant == "cuda")]
       - patches/skip-CudaNhwcTypedTest.patch              # [(ep_variant == "cuda")]
+      - patches/skip-CudaNhwcTypedTest-2.patch            # [(ep_variant == "cuda")]
       # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
       # - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
       # - patches/0001-remove-broken-cuda-moe-test-case.patch                 # [(ep_variant == "cuda")]

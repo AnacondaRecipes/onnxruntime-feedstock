@@ -12,5 +12,5 @@ suffix:
   - ""
   - "-novec"
 ep_variant:
-  - cuda                   # [linux64 or win64]
-  - cpu
+  - "cuda"                   # [linux64 or win64]
+  - "cpu"
