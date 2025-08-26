@@ -93,14 +93,15 @@ requirements:
 
 outputs:
   - name: onnxruntime{{ suffix }}
-    test:
-      imports:
-        - onnxruntime
-      commands:
-        - pip check
-        - onnxruntime_test --help
-      requires:
-        - pip
+    # Skip testing cuda variant as __cuda is unsolvable on CI
+    test:                          # [(ep_variant == "cpu")]
+      imports:                     # [(ep_variant == "cpu")]
+        - onnxruntime              # [(ep_variant == "cpu")]
+      commands:                    # [(ep_variant == "cpu")]
+        - pip check                # [(ep_variant == "cpu")]
+        - onnxruntime_test --help  # [(ep_variant == "cpu")]
+      requires:                    # [(ep_variant == "cpu")]
+        - pip                      # [(ep_variant == "cpu")]
   - name: onnxruntime{{ suffix }}-cpp
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
@@ -124,29 +125,29 @@ outputs:
         - __cuda  # [(ep_variant == "cuda")]
       run_constrained:
         - onnxruntime <0a0  # [suffix == "-novec"]
-    test:
-      requires: 
-        - {{ compiler('cxx') }}
-        - {{ stdlib('c') }}
-      files:
-        - test.cpp
-        - run_cpp_test.bat
-      commands:
-        - test -f $PREFIX/include/onnxruntime/core/session/onnxruntime_cxx_api.h  # [unix]
-        - test -f $PREFIX/lib/libonnxruntime${SHLIB_EXT}  # [unix]
-        - test -f $PREFIX/lib/libonnxruntime_providers_shared${SHLIB_EXT}  # [unix and (ep_variant == "cuda")]
-        - test -f $PREFIX/lib/libonnxruntime_providers_cuda${SHLIB_EXT}  # [unix and (ep_variant == "cuda")]
-        - if not exist %LIBRARY_INC%\\onnxruntime\\core\\session\\onnxruntime_cxx_api.h exit 1  # [win]
-        - if not exist %LIBRARY_LIB%\\onnxruntime_conda.lib exit 1  # [win]
-        - if not exist %LIBRARY_BIN%\\onnxruntime_conda.dll exit 1  # [win]
-        - if not exist %LIBRARY_LIB%\\onnxruntime_providers_shared.lib exit 1  # [win and (ep_variant == "cuda")]
-        - if not exist %LIBRARY_BIN%\\onnxruntime_providers_shared.dll exit 1  # [win and (ep_variant == "cuda")]
-        - if not exist %LIBRARY_LIB%\\onnxruntime_providers_cuda.lib exit 1  # [win and (ep_variant == "cuda")]
-        - if not exist %LIBRARY_BIN%\\onnxruntime_providers_cuda.dll exit 1  # [win and (ep_variant == "cuda")]
-        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime test.cpp                               # [linux]
-        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime -Wl,-rpath,$CONDA_PREFIX/lib test.cpp  # [osx]
-        - ./a.out  # [unix]
-        - call .\run_cpp_test.bat  # [win]
+    test:                        # [(ep_variant == "cpu")]
+      requires:                  # [(ep_variant == "cpu")]
+        - {{ compiler('cxx') }}  # [(ep_variant == "cpu")]
+        - {{ stdlib('c') }}      # [(ep_variant == "cpu")]
+      files:                     # [(ep_variant == "cpu")]
+        - test.cpp               # [(ep_variant == "cpu")]
+        - run_cpp_test.bat       # [(ep_variant == "cpu")]
+      commands:                  # [(ep_variant == "cpu")]
+        - test -f $PREFIX/include/onnxruntime/core/session/onnxruntime_cxx_api.h  # [unix and (ep_variant == "cpu")]
+        - test -f $PREFIX/lib/libonnxruntime${SHLIB_EXT}                          # [unix and (ep_variant == "cpu")]
+        # - test -f $PREFIX/lib/libonnxruntime_providers_shared${SHLIB_EXT}  # [unix and (ep_variant == "cuda")]
+        # - test -f $PREFIX/lib/libonnxruntime_providers_cuda${SHLIB_EXT}    # [unix and (ep_variant == "cuda")]
+        - if not exist %LIBRARY_INC%\\onnxruntime\\core\\session\\onnxruntime_cxx_api.h exit 1  # [win and (ep_variant == "cpu")]
+        - if not exist %LIBRARY_LIB%\\onnxruntime_conda.lib exit 1                              # [win and (ep_variant == "cpu")]
+        - if not exist %LIBRARY_BIN%\\onnxruntime_conda.dll exit 1                              # [win and (ep_variant == "cpu")]
+        # - if not exist %LIBRARY_LIB%\\onnxruntime_providers_shared.lib exit 1  # [win and (ep_variant == "cuda")]
+        # - if not exist %LIBRARY_BIN%\\onnxruntime_providers_shared.dll exit 1  # [win and (ep_variant == "cuda")]
+        # - if not exist %LIBRARY_LIB%\\onnxruntime_providers_cuda.lib exit 1    # [win and (ep_variant == "cuda")]
+        # - if not exist %LIBRARY_BIN%\\onnxruntime_providers_cuda.dll exit 1    # [win and (ep_variant == "cuda")]
+        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime test.cpp                               # [linux and (ep_variant == "cpu")]
+        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime -Wl,-rpath,$CONDA_PREFIX/lib test.cpp  # [osx and (ep_variant == "cpu")]
+        - ./a.out                  # [unix and (ep_variant == "cpu")]
+        - call .\run_cpp_test.bat  # [win and (ep_variant == "cpu")]
 
 about:
   home: https://onnxruntime.ai
