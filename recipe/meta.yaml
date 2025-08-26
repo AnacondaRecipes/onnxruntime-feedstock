@@ -58,9 +58,9 @@ requirements:
     - cudnn {{ cudnn }}                            # [(ep_variant == "cuda")]
     - cuda-version {{ cuda_compiler_version }}     # [(ep_variant == "cuda")]
     - libcublas-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
-    - libcusparse-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-    - libcurand-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
-    - libcufft-dev {{ cuda_compiler_version }}     # [(ep_variant == "cuda")]
+    - libcusparse-dev 12.3.1.170                   # [(ep_variant == "cuda")]
+    - libcurand-dev 10.3.5.147                     # [(ep_variant == "cuda")]
+    - libcufft-dev 11.2.1.3                        # [(ep_variant == "cuda")]
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
     - cuda-nvrtc-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
     # Needed for CUDA profiling
@@ -72,7 +72,7 @@ requirements:
     - flake8 7.1.1
     - libdate 3.0.1
     - packaging
-    - python-flatbuffers {{ flatbuffers }}
+    - python-flatbuffers 24.3.25
     - optional-lite 3.5.0
     - zlib {{ zlib }}
     - numpy {{ numpy }}
@@ -117,7 +117,7 @@ outputs:
       host:
         - cudnn {{ cudnn }}                            # [(ep_variant == "cuda")]
         - libcublas-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
-        - libcufft-dev {{ cuda_compiler_version }}     # [(ep_variant == "cuda")]
+        - libcufft-dev 11.2.1.3                        # [(ep_variant == "cuda")]
         - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
         - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
       run:
