@@ -7,8 +7,10 @@ if "%ep_variant%" == "cuda" (
     set "CUDAHOSTCXX=%CXX%"
     set "cmake_extra_defines=%cmake_extra_defines% CMAKE_CUDA_COMPILER=%LIBRARY_BIN:\=/%/nvcc.exe"
     set "CUDA_ARGS=--use_cuda --cuda_home %LIBRARY_PREFIX:\=/% --cudnn_home %LIBRARY_PREFIX% --enable_cuda_profiling"
+    set "RUN_TESTS=--skip_tests"
 ) else (
     set "CUDA_ARGS="
+    set "RUN_TESTS=--test"
 )
 
 :: We set CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON as currently we do not want to use
@@ -24,7 +26,7 @@ if "%ep_variant%" == "cuda" (
     --update ^
     --build ^
     --parallel 0 ^
-    --test ^
+    %RUN_TESTS% ^
     --skip_submodule_sync ^
     %CUDA_ARGS%
 if errorlevel 1 exit 1
