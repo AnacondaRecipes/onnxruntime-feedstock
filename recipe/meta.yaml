@@ -10,24 +10,21 @@ source:
     sha256: 08b078eb7afbf376064b2b0f1781e3d78151cac0592988a0c0ec78bf72fde810
     patches:
       - patches/dont-call-pip-on-win.patch                # [win]
-      - patches/skip-lora-cuda-test.patch                 # [(ep_variant == "cuda")]
-      - patches/skip-custom-op-handler-cuda-test.patch    # [(ep_variant == "cuda")]
-      - patches/skip-thread-pool-tests.patch              # [(ep_variant == "cuda")]
-      - patches/skip-onnxruntime_shared_lib_test.patch    # [(ep_variant == "cuda")]
-      - patches/skip-onnxruntime_test_python.patch        # [(ep_variant == "cuda")]
-      - patches/0002-skip-testing-python-iobinding.patch  # [(ep_variant == "cuda")]
-      - patches/skip-CudaNhwcTypedTest.patch              # [(ep_variant == "cuda")]
+      # - patches/skip-lora-cuda-test.patch                 # [(ep_variant == "cuda")]
+      # - patches/skip-custom-op-handler-cuda-test.patch    # [(ep_variant == "cuda")]
+      # - patches/skip-thread-pool-tests.patch              # [(ep_variant == "cuda")]
+      # - patches/skip-onnxruntime_shared_lib_test.patch    # [(ep_variant == "cuda")]
+      # - patches/skip-onnxruntime_test_python.patch        # [(ep_variant == "cuda")]
+      # - patches/0002-skip-testing-python-iobinding.patch  # [(ep_variant == "cuda")]
+      # - patches/skip-CudaNhwcTypedTest.patch              # [(ep_variant == "cuda")]
       # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
       # - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
-      # - patches/0001-remove-broken-cuda-moe-test-case.patch                 # [(ep_variant == "cuda")]
-      # - patches/skip_custom_op_test_with_cuda.patch                         # [(ep_variant == "cuda")]
       # - patches/fix_cwd_name_on_win.patch                                   # [win]
       - patches/fix-eigen-hash.patch
 
 build:
   number: 0
   skip: true  # [py<310]
-  # string: gpu_cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{PKG_HASH}}_{{ PKG_BUILDNUM }}  # [(ep_variant == "cuda")]
   string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
   ignore_run_exports_from:
     - zlib
