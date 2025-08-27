@@ -36,3 +36,6 @@ for %%F in (build-ci\Release\dist\onnxruntime*.whl) do (
     %PYTHON% -m pip install %%F --no-deps --no-build-isolation -v
     if errorlevel 1 exit 1
 )
+
+where onnxruntime_providers_cuda.dll
+where onnxruntime_providers_shared.dll
