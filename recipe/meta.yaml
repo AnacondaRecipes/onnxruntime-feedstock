@@ -1,5 +1,5 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.22.0" %}
+{% set version = "1.22.2" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}
@@ -7,10 +7,10 @@ package:
 
 source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: 08b078eb7afbf376064b2b0f1781e3d78151cac0592988a0c0ec78bf72fde810
+    sha256: 6f82b949636df0c964cc6f1ef4f1b39b397dce456f92b204d87b46d258687b41
     patches:
       - patches/dont-call-pip-on-win.patch                # [win]
-      - patches/fix-eigen-hash.patch
+      # - patches/fix-eigen-hash.patch
 
 build:
   number: 0
