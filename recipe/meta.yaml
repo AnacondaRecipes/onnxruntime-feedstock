@@ -10,7 +10,7 @@ source:
     sha256: 6f82b949636df0c964cc6f1ef4f1b39b397dce456f92b204d87b46d258687b41
     patches:
       - patches/dont-call-pip-on-win.patch                # [win]
-      # - patches/fix-eigen-hash.patch
+      - patches/fix_cwd_name_on_win.patch                 # [win]
 
 build:
   number: 0
@@ -25,10 +25,6 @@ build:
     - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
   missing_dso_whitelist:
     - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
-    - '**/dxcore.dll'                          # [win]
-    # Build by this package;
-    # Reported as missing for onnxruntime_providers_cuda.dll, but it's installed in the same folder
-    - $RPATH/onnxruntime_providers_shared.dll  # [win]
 
 requirements:
   build:
