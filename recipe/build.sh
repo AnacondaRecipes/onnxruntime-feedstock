@@ -2,8 +2,6 @@
 
 set -exuo pipefail
 
-find ${PREFIX} -name nvcc
-
 if [[ "${PKG_NAME}" == 'onnxruntime-novec' ]]; then
     DONT_VECTORIZE="ON"
 else
