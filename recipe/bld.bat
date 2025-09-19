@@ -15,6 +15,7 @@ if "%ep_variant%" == "cuda" (
 
 :: We set CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON as currently we do not want to use
 :: protobuf from conda-forge, see https://github.com/conda-forge/onnxruntime-feedstock/issues/57#issuecomment-1518033552
+:: Using 4 threads, as default value (0 == 8 threads) is leading to OOM issues.
 %PYTHON% tools/ci_build/build.py ^
     --compile_no_warning_as_error ^
     --enable_pybind ^
@@ -25,7 +26,7 @@ if "%ep_variant%" == "cuda" (
     --config Release ^
     --update ^
     --build ^
-    --parallel 0 ^
+    --parallel 4 ^
     %RUN_TESTS% ^
     --skip_submodule_sync ^
     %CUDA_ARGS%
