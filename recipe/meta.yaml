@@ -13,7 +13,6 @@ source:
       - patches/fix_cwd_name_on_win.patch                 # [win]
       - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
       - patches/skip-fastmath-test.patch                  # [aarch64]
-      - patches/skip-QDQTransformerTests.patch            # [aarch64]
       - patches/ctest-output-on-failure.patch
 
 build:
