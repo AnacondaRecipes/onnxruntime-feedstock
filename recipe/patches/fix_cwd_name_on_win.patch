@@ -10,11 +10,11 @@ Index: onnxruntime/tools/ci_build/build.py
 @@ -1995,8 +1995,8 @@ def run_onnxruntime_tests(args, source_d
              if is_reduced_ops_build(args) or args.minimal_build is not None:
                  return
- 
+
 -            if is_windows():
 -                cwd = os.path.join(cwd, config)
 +            # if is_windows():
 +            #     cwd = os.path.join(cwd, config)
- 
+
              run_subprocess(
                  [sys.executable, "onnxruntime_test_python.py"], cwd=cwd, dll_path=dll_path, python_path=python_path

@@ -8,28 +8,28 @@ else
     DONT_VECTORIZE="OFF"
 fi
 
-if [[ "${target_platform:-other}" == 'osx-arm64' ]]; then
-    OSX_ARCH="arm64"
+if [[ "$(uname -s)" == "Linux" ]]; then
+    OS_SPECIFIC_ARGS="--allow_running_as_root"
 else
-    OSX_ARCH="x86_64"
+    OS_SPECIFIC_ARGS=""
 fi
 
-cmake_extra_defines=( "EIGEN_MPL2_ONLY=ON" \
-		      "FLATBUFFERS_BUILD_FLATC=OFF" \
-	              "onnxruntime_USE_COREML=OFF" \
-                      "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
-                      "onnxruntime_BUILD_SHARED_LIB=ON" \
-                      "onnxruntime_BUILD_UNIT_TESTS=ON" \
-                      "CMAKE_PREFIX_PATH=$PREFIX" \
-                      "CMAKE_CUDA_ARCHITECTURES=all-major"
-		    )
+cmake_extra_defines=("EIGEN_MPL2_ONLY=ON" \
+		             "FLATBUFFERS_BUILD_FLATC=OFF" \
+	                 "onnxruntime_USE_COREML=OFF" \
+                     "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
+                     "onnxruntime_BUILD_SHARED_LIB=ON" \
+                     "onnxruntime_BUILD_UNIT_TESTS=ON" \
+                     "CMAKE_PREFIX_PATH=$PREFIX" \
+                     "CMAKE_CUDA_ARCHITECTURES=all-major"
+		            )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
 # into --cmake_extra_defines.
 read -a CMAKE_ARGS_ARRAY <<< "${CMAKE_ARGS}"
 for cmake_arg in "${CMAKE_ARGS_ARRAY[@]}"
 do
-    if [[ "${cmake_arg}" == -DCMAKE_SYSTEM_* ]]; then
+    if [[ "${cmake_arg}" == -DCMAKE_* ]]; then
         # Strip -D prefix
         cmake_extra_defines+=( "${cmake_arg#"-D"}" )
     fi
@@ -40,12 +40,18 @@ if [[ "${ep_variant:-}" == "cuda" ]]; then
                                                 # files, rather than the one in the conda environment, resulting in compiler errors
     CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling"
     cmake_extra_defines+=('CUDAToolkit_INCLUDE_DIR="${PREFIX}/targets/x86_64-linux/include/"')
+    # Skipping all tests for CUDA variants, as they're crashing after passing
+    # this is related to CUDA Execution Provider cleanup, which fails, as CI images are missing CUDA drivers
+    # All the tests are passing locally on CUDA-enabled docker
+    RUN_TESTS="--skip_tests"
 else
     CUDA_ARGS=""
+    RUN_TESTS="--test"
 fi
 
+echo "${cmake_extra_defines[@]}"
+
 ${PYTHON} tools/ci_build/build.py \
-    --allow_running_as_root \
     --compile_no_warning_as_error \
     --enable_lto \
     --enable_pybind \
@@ -56,10 +62,10 @@ ${PYTHON} tools/ci_build/build.py \
     --config Release \
     --update \
     --build \
-    --parallel \
+    --parallel 0 \
     --skip_submodule_sync \
-    --osx_arch $OSX_ARCH \
-    --test \
+    $RUN_TESTS \
+    $OS_SPECIFIC_ARGS \
     $CUDA_ARGS
 
 if [[ "${ep_variant:-}" == "cuda" ]]; then

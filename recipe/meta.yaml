@@ -1,5 +1,5 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.20.1" %}
+{% set version = "1.22.2" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}
@@ -7,59 +7,67 @@ package:
 
 source:
   - url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: d4c005506a2bbf88a838b14f8d1578406b8be2fb64abb50beeff908fb272529e
+    sha256: 6f82b949636df0c964cc6f1ef4f1b39b397dce456f92b204d87b46d258687b41
     patches:
-      - patches/dont-call-pip-on-win.patch                                  # [win]
-      # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
+      - patches/dont-call-pip-on-win.patch                # [win]
+      - patches/fix_cwd_name_on_win.patch                 # [win]
       - patches/windows_workaround_conflict_onnxruntime_dll_system32.patch  # [win]
-      - patches/0001-remove-broken-cuda-moe-test-case.patch                 # [(ep_variant == "cuda")]
-      - patches/0002-skip-testing-python-iobinding.patch                    # [(ep_variant == "cuda")]
-      - patches/skip_custom_op_test_with_cuda.patch                         # [(ep_variant == "cuda")]
-      - patches/fix_cwd_name_on_win.patch                                   # [win]
+      - patches/skip-fastmath-test.patch                  # [aarch64]
+      - patches/ctest-output-on-failure.patch
 
 build:
   number: 0
-  skip: True  # [s390x]
-  string: gpu_cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{PKG_HASH}}_{{ PKG_BUILDNUM }}  # [(ep_variant == "cuda")]
+  skip: true  # [py<310]
+  string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
   ignore_run_exports_from:
     - zlib
+  ignore_run_exports:
+    - numpy
+    - libcurl
   entry_points:
     - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
   missing_dso_whitelist:
     - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
+    # For some reason discovered by conda as $RPATH/onnxruntime_providers_shared.dll
+    # while the dumpbin shows just the name, and the file is installed to the same dir
+    - '**/onnxruntime_providers_shared.dll'    # [win]
 
 requirements:
   build:
-    - python
+    - {{ stdlib('c') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }} # [(ep_variant == "cuda")]
+    - {{ compiler('cuda') }}  # [(ep_variant == "cuda")]
     - cmake
     - git       # [not win]
     - ninja     # [not win]
-    - patch     # [unix and (ep_variant == "cuda")]
-    - m2-patch  # [win]
   host:
-    - python
-    - pip
-    - wheel
-    - packaging
-    - python-flatbuffers
-    - zlib {{ zlib }}
-    - numpy 2.0  # [py<313]
-    - numpy 2.1  # [py>=313]
-    - pybind11 2.13
     # GPU requirements
     - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
-    - cuda-nvrtc-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cudnn {{ cudnn }}                            # [(ep_variant == "cuda")]
+    - cuda-version {{ cuda_compiler_version }}     # [(ep_variant == "cuda")]
+    - libcublas-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
+    - libcusparse-dev 12.3.1.170                   # [(ep_variant == "cuda")]
+    - libcurand-dev 10.3.5.147                     # [(ep_variant == "cuda")]
+    - libcufft-dev 11.2.1.3                        # [(ep_variant == "cuda")]
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-    # Needed for CUDA profiling.                   # [(ep_variant == "cuda")]
+    - cuda-nvrtc-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    # Needed for CUDA profiling
     - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
-    - cudnn 9.1.1.17*                              # [(ep_variant == "cuda")]
-    - libcublas-dev                                # [(ep_variant == "cuda")]
-    - libcufft-dev                                 # [(ep_variant == "cuda")]
-    - libcurand-dev                                # [(ep_variant == "cuda")]
-    - libcusparse-dev                              # [(ep_variant == "cuda")]
+    - python
+    - pip
+    - setuptools
+    - wheel
+    # Pinning to the versions used, no particular requirements on them
+    - flake8 7.1.1
+    - libdate 3.0.1
+    - packaging
+    - python-flatbuffers 24.3.25
+    - optional-lite 3.5.0
+    - zlib {{ zlib }}
+    - numpy {{ numpy }}
+    - pybind11 2.13
+    - psutil 5.9.0
   run:
     - __cuda  # [linux and (ep_variant == "cuda")]
     - coloredlogs
@@ -73,19 +81,68 @@ requirements:
   run_constrained:
     - onnxruntime <0a0  # [suffix == "-novec"]
 
-test:
-  imports:
-    - onnxruntime
-  commands:
-    - pip check
-    - onnxruntime_test --help
-  requires:
-    - pip
+outputs:
+  - name: onnxruntime{{ suffix }}
+    # Skip testing cuda variant as __cuda is unsolvable on CI
+    test:                          # [(ep_variant == "cpu")]
+      imports:                     # [(ep_variant == "cpu")]
+        - onnxruntime              # [(ep_variant == "cpu")]
+      commands:                    # [(ep_variant == "cpu")]
+        - pip check                # [(ep_variant == "cpu")]
+        - onnxruntime_test --help  # [(ep_variant == "cpu")]
+      requires:                    # [(ep_variant == "cpu")]
+        - pip                      # [(ep_variant == "cpu")]
+  - name: onnxruntime{{ suffix }}-cpp
+    build:
+      string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
+      run_exports:
+        - {{ pin_subpackage('onnxruntime' + suffix + '-cpp', max_pin='x.x.x') }}
+    script: install-cpp.sh  # [unix]
+    script: install-cpp.bat  # [win]
+    requirements:
+      build:
+        - {{ stdlib('c') }}
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}  # [(ep_variant == "cuda")]
+      host:
+        - cudnn {{ cudnn }}                            # [(ep_variant == "cuda")]
+        - libcublas-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
+        - libcufft-dev 11.2.1.3                        # [(ep_variant == "cuda")]
+        - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
+        - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+      run:
+        - __cuda  # [(ep_variant == "cuda")]
+      run_constrained:
+        - onnxruntime <0a0  # [suffix == "-novec"]
+    test:                        # [(ep_variant == "cpu")]
+      requires:                  # [(ep_variant == "cpu")]
+        - {{ compiler('cxx') }}  # [(ep_variant == "cpu")]
+        - {{ stdlib('c') }}      # [(ep_variant == "cpu")]
+      files:                     # [(ep_variant == "cpu")]
+        - test.cpp               # [(ep_variant == "cpu")]
+        - run_cpp_test.bat       # [(ep_variant == "cpu")]
+      commands:                  # [(ep_variant == "cpu")]
+        - test -f $PREFIX/include/onnxruntime/core/session/onnxruntime_cxx_api.h  # [unix and (ep_variant == "cpu")]
+        - test -f $PREFIX/lib/libonnxruntime${SHLIB_EXT}                          # [unix and (ep_variant == "cpu")]
+        # - test -f $PREFIX/lib/libonnxruntime_providers_shared${SHLIB_EXT}  # [unix and (ep_variant == "cuda")]
+        # - test -f $PREFIX/lib/libonnxruntime_providers_cuda${SHLIB_EXT}    # [unix and (ep_variant == "cuda")]
+        - if not exist %LIBRARY_INC%\\onnxruntime\\core\\session\\onnxruntime_cxx_api.h exit 1  # [win and (ep_variant == "cpu")]
+        - if not exist %LIBRARY_LIB%\\onnxruntime_conda.lib exit 1                              # [win and (ep_variant == "cpu")]
+        - if not exist %LIBRARY_BIN%\\onnxruntime_conda.dll exit 1                              # [win and (ep_variant == "cpu")]
+        # - if not exist %LIBRARY_LIB%\\onnxruntime_providers_shared.lib exit 1  # [win and (ep_variant == "cuda")]
+        # - if not exist %LIBRARY_BIN%\\onnxruntime_providers_shared.dll exit 1  # [win and (ep_variant == "cuda")]
+        # - if not exist %LIBRARY_LIB%\\onnxruntime_providers_cuda.lib exit 1    # [win and (ep_variant == "cuda")]
+        # - if not exist %LIBRARY_BIN%\\onnxruntime_providers_cuda.dll exit 1    # [win and (ep_variant == "cuda")]
+        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime test.cpp                               # [linux and (ep_variant == "cpu")]
+        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime -Wl,-rpath,$CONDA_PREFIX/lib test.cpp  # [osx and (ep_variant == "cpu")]
+        - ./a.out                  # [unix and (ep_variant == "cpu")]
+        - call .\run_cpp_test.bat  # [win and (ep_variant == "cpu")]
 
 about:
-  home: https://onnxruntime.ai/
-  dev_url: https://github.com/microsoft/onnxruntime/
-  doc_url: https://onnxruntime.ai/docs/
+  home: https://onnxruntime.ai
+  dev_url: https://github.com/microsoft/onnxruntime
+  doc_url: https://onnxruntime.ai/docs
   summary: cross-platform, high performance ML inferencing and training accelerator
   description: |
     ONNX Runtime is a cross-platform machine-learning model accelerator,
@@ -103,3 +160,7 @@ extra:
     - janjagusch
     - jtilly
     - cbourjau
+  skip-lints:
+    - missing_section
+    - outputs_not_unique
+    - patch_unnecessary

@@ -1,11 +1,12 @@
-Index: onnxruntime/cmake/onnxruntime.cmake
-===================================================================
---- onnxruntime.orig/cmake/onnxruntime.cmake	2024-02-23 14:57:45.050167052 -0600
-+++ onnxruntime/cmake/onnxruntime.cmake	2024-02-23 15:27:47.278523390 -0600
-@@ -72,6 +72,8 @@
-     "${ONNXRUNTIME_ROOT}/core/dll/dllmain.cc"
+diff --git a/cmake/onnxruntime.cmake b/cmake/onnxruntime.cmake
+index 6c1d448..4ea2943 100644
+--- a/cmake/onnxruntime.cmake
++++ b/cmake/onnxruntime.cmake
+@@ -80,6 +80,9 @@ if(WIN32)
+     "${ONNXRUNTIME_ROOT}/core/dll/delay_load_hook.cc"
      "${ONNXRUNTIME_ROOT}/core/dll/onnxruntime.rc"
    )
++
 +  # Workaround for https://github.com/conda-forge/onnxruntime-feedstock/pull/56#issuecomment-1586080419
 +  set_target_properties(onnxruntime PROPERTIES OUTPUT_NAME onnxruntime_conda)
  elseif(onnxruntime_BUILD_APPLE_FRAMEWORK)

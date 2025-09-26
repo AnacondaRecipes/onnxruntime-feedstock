@@ -1,16 +1,17 @@
-MACOSX_DEPLOYMENT_TARGET:  # [osx and x86_64]
-  - "10.15"                # [osx and x86_64]
-MACOSX_SDK_VERSION:        # [osx and x86_64]
-  - "10.15"                # [osx and x86_64]
-CONDA_BUILD_SYSROOT:       # [osx and x86_64]
-  - /opt/MacOSX10.15.sdk   # [osx and x86_64]
 cxx_compiler:              # [win]
   - vs2019                 # [win]
 c_compiler:                # [win]
   - vs2019                 # [win]
+
+# Upstream is using some flags that are unrecognized in clang17
+c_compiler_version:        # [osx]
+  - 14                     # [osx]
+cxx_compiler_version:      # [osx]
+  - 14                     # [osx]
+
 suffix:
   - ""
   - "-novec"
-# for now we don't have a CUDA CI worker; uncomment the below to build for a CUDA execution provider (manually)
-#ep_variant:
-#  - cuda
+ep_variant:
+  - "cuda"                   # [linux64 or win64]
+  - "cpu"
