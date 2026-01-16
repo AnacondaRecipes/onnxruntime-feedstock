@@ -1,39 +1,60 @@
 @echo on
 
+set "BUILD_DIR=%TEMP%\b"
 set cmake_extra_defines="EIGEN_MPL2_ONLY=ON onnxruntime_USE_COREML=OFF onnxruntime_BUILD_SHARED_LIB=ON onnxruntime_BUILD_UNIT_TESTS=ON CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% CMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON"
 
-:: Enable CUDA support
+:: Check if PKG_NAME contains "-cpp"
+echo %PKG_NAME% | findstr /C:"-cpp" >nul
+if %errorlevel% == 0 (
+    setlocal enabledelayedexpansion
+    mkdir "%LIBRARY_INC%\onnxruntime"
+    mkdir "%LIBRARY_LIB%"
+    mkdir "%LIBRARY_BIN%"
+    robocopy %SRC_DIR%\include\onnxruntime "%LIBRARY_INC%\onnxruntime" /E /NFL /NDL /NJH /NJS
+    if %errorlevel% leq 7 set errorlevel=0
+    copy /Y %BUILD_DIR%\Release\onnxruntime_conda.lib "%LIBRARY_LIB%"
+    copy /Y %BUILD_DIR%\Release\onnxruntime_conda.dll "%LIBRARY_BIN%"
+    if "%ep_variant%" == "cuda" (
+        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_shared.lib "%LIBRARY_LIB%"
+        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_shared.dll "%LIBRARY_BIN%"
+        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_cuda.lib "%LIBRARY_LIB%"
+        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_cuda.dll "%LIBRARY_BIN%"
+    )
+    exit 0
+)
+
+if exist "%BUILD_DIR%" rmdir /s /q "%BUILD_DIR%"
+mkdir "%BUILD_DIR%"
+
 if "%ep_variant%" == "cuda" (
     set "CUDAHOSTCXX=%CXX%"
-    set "cmake_extra_defines=%cmake_extra_defines% CMAKE_CUDA_COMPILER=%LIBRARY_BIN:\=/%/nvcc.exe"
-    set "CUDA_ARGS=--use_cuda --cuda_home %LIBRARY_PREFIX:\=/% --cudnn_home %LIBRARY_PREFIX% --enable_cuda_profiling"
+    set "cmake_extra_defines=%cmake_extra_defines% CMAKE_CUDA_COMPILER=%LIBRARY_BIN:\=/%/nvcc.exe CMAKE_CUDA_ARCHITECTURES=75;80;86;89;90a;100a;103;120a;121"
+    set "CUDA_ARGS=--use_cuda --cuda_home %LIBRARY_PREFIX:\=/% --cudnn_home %LIBRARY_PREFIX% --enable_cuda_profiling  --nvcc_threads 1"
     set "RUN_TESTS=--skip_tests"
 ) else (
     set "CUDA_ARGS="
     set "RUN_TESTS=--test"
 )
 
-:: We set CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON as currently we do not want to use
-:: protobuf from conda-forge, see https://github.com/conda-forge/onnxruntime-feedstock/issues/57#issuecomment-1518033552
-:: Using 4 threads, as default value (0 == 8 threads) is leading to OOM issues.
-%PYTHON% tools/ci_build/build.py ^
+%PYTHON% %SRC_DIR%/tools/ci_build/build.py ^
     --compile_no_warning_as_error ^
     --enable_pybind ^
-    --build_dir build-ci ^
+    --build_dir %BUILD_DIR% ^
     --cmake_extra_defines %cmake_extra_defines% ^
     --cmake_generator Ninja ^
     --build_wheel ^
     --config Release ^
     --update ^
     --build ^
-    --parallel 4 ^
-    %RUN_TESTS% ^
+    --clean ^
+    --parallel 2 ^
+    --skip_pip_install ^
     --skip_submodule_sync ^
+    %RUN_TESTS% ^
     %CUDA_ARGS%
 if errorlevel 1 exit 1
 
-:: In theory there should be only one wheel
-for %%F in (build-ci\Release\dist\onnxruntime*.whl) do (
-    %PYTHON% -m pip install %%F --no-deps --no-build-isolation -v
+for %%F in (%BUILD_DIR%\Release\dist\onnxruntime*.whl) do (
+    %PYTHON% -m pip install --no-deps --no-build-isolation -vvv %%F
     if errorlevel 1 exit 1
 )

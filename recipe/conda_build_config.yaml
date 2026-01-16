@@ -1,17 +1,19 @@
-cxx_compiler:              # [win]
-  - vs2019                 # [win]
-c_compiler:                # [win]
-  - vs2019                 # [win]
-
 # Upstream is using some flags that are unrecognized in clang17
 c_compiler_version:        # [osx]
   - 14                     # [osx]
 cxx_compiler_version:      # [osx]
   - 14                     # [osx]
+# Containers from newer standards are used
+c_stdlib_version:          # [osx]
+  - 13.3                   # [osx]
+cuda_compiler_version:
+  - 12.9
+libcufft:
+  - 11
 
 suffix:
   - ""
   - "-novec"
 ep_variant:
-  - "cuda"                   # [linux64 or win64]
+  - "cuda"                 # [linux64 or win64]
   - "cpu"

@@ -2,16 +2,30 @@
 
 set -exuo pipefail
 
-if [[ "${PKG_NAME}" == 'onnxruntime-novec' ]]; then
+export BUILD_DIR="build"
+
+if [[ ${PKG_NAME} == *"-cpp"* ]]; then
+    mkdir -p "${PREFIX}/include"
+    mkdir -p "${PREFIX}/lib"
+    cp -pr ${SRC_DIR}/include/onnxruntime "${PREFIX}/include/"
+
+    if [[ -n "${OSX_ARCH:+yes}" ]]; then
+        install ${BUILD_DIR}/Release/libonnxruntime.*dylib "${PREFIX}/lib"
+    else
+        install ${BUILD_DIR}/Release/libonnxruntime.so* "${PREFIX}/lib"
+        if [[ "${ep_variant:-}" == "cuda" ]]; then
+            install ${BUILD_DIR}/Release/libonnxruntime_providers_shared.so* "${PREFIX}/lib"
+            install ${BUILD_DIR}/Release/libonnxruntime_providers_cuda.so* "${PREFIX}/lib"
+        fi
+    fi
+
+    exit 0
+fi
+
+if [[ "${PKG_NAME}" == "onnxruntime-novec" ]]; then
     DONT_VECTORIZE="ON"
 else
     DONT_VECTORIZE="OFF"
-fi
-
-if [[ "$(uname -s)" == "Linux" ]]; then
-    OS_SPECIFIC_ARGS="--allow_running_as_root"
-else
-    OS_SPECIFIC_ARGS=""
 fi
 
 cmake_extra_defines=("EIGEN_MPL2_ONLY=ON" \
@@ -21,7 +35,12 @@ cmake_extra_defines=("EIGEN_MPL2_ONLY=ON" \
                      "onnxruntime_BUILD_SHARED_LIB=ON" \
                      "onnxruntime_BUILD_UNIT_TESTS=ON" \
                      "CMAKE_PREFIX_PATH=$PREFIX" \
-                     "CMAKE_CUDA_ARCHITECTURES=all-major"
+                     "GTest_ROOT=${PREFIX}" \
+                     "CMAKE_FIND_ROOT_PATH=${PREFIX}" \
+                     "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" \
+                     "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" \
+                     "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" \
+                     "CMAKE_CUDA_ARCHITECTURES=75;80;86;89;90a;100a;103;120a;121"
 		            )
 
 # Copy the defines from the "activate" script (e.g. activate-gcc_linux-aarch64.sh)
@@ -38,7 +57,7 @@ done
 if [[ "${ep_variant:-}" == "cuda" ]]; then
     export CUDAHOSTCXX="${CXX}"                # If this isn't included, CUDA will use the system compiler to compile host
                                                 # files, rather than the one in the conda environment, resulting in compiler errors
-    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling"
+    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling --nvcc_threads 3"
     cmake_extra_defines+=('CUDAToolkit_INCLUDE_DIR="${PREFIX}/targets/x86_64-linux/include/"')
     # Skipping all tests for CUDA variants, as they're crashing after passing
     # this is related to CUDA Execution Provider cleanup, which fails, as CI images are missing CUDA drivers
@@ -49,31 +68,34 @@ else
     RUN_TESTS="--test"
 fi
 
-echo "${cmake_extra_defines[@]}"
-
-${PYTHON} tools/ci_build/build.py \
+${PYTHON} ${SRC_DIR}/tools/ci_build/build.py \
     --compile_no_warning_as_error \
     --enable_lto \
     --enable_pybind \
-    --build_dir build-ci \
+    --build_dir ${BUILD_DIR} \
     --cmake_extra_defines "${cmake_extra_defines[@]}" \
     --cmake_generator Ninja \
     --build_wheel \
     --config Release \
     --update \
     --build \
-    --parallel 0 \
+    --clean \
+    --parallel 4 \
+    --skip_pip_install \
     --skip_submodule_sync \
-    $RUN_TESTS \
-    $OS_SPECIFIC_ARGS \
-    $CUDA_ARGS
+    ${RUN_TESTS} \
+    ${CUDA_ARGS}
 
-if [[ "${ep_variant:-}" == "cuda" ]]; then
-    WHL_BASE_NAME="onnxruntime_gpu"
-else
-    WHL_BASE_NAME="onnxruntime"
-fi
-
-for whl_file in build-ci/Release/dist/${WHL_BASE_NAME}*.whl; do
-    ${PYTHON} -m pip install "$whl_file" --no-deps --no-build-isolation -v
+for whl_file in $SRC_DIR/${BUILD_DIR}/Release/dist/onnxruntime*.whl; do
+    ${PYTHON} -m pip install --no-deps --no-build-isolation -vvv $whl_file
 done
+
+# Fix CUDA variant dist-info to match conda package name
+if [[ "${ep_variant:-}" == "cuda" ]]; then
+    for d in "${SP_DIR}"/onnxruntime_gpu-*.dist-info; do
+        [ -d "$d" ] || continue
+        new_d="${d/onnxruntime_gpu/onnxruntime}"
+        mv "$d" "$new_d"
+        sed -i 's/^Name: onnxruntime-gpu$/Name: onnxruntime/' "$new_d/METADATA"
+    done
+fi
