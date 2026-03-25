@@ -34,18 +34,18 @@ requirements:
   host:
     - gtest
     - gmock
-    # GPU requirements
+    # GPU requirements — pin toolkit packages to cuda_compiler_version,
+    # let solver pick library versions via cuda-version constraint
     - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
-    - cudnn {{ cudnn }}                            # [(ep_variant == "cuda")]
     - cuda-version {{ cuda_compiler_version }}     # [(ep_variant == "cuda")]
-    - libcublas-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
-    - libcurand-dev {{ libcurand }}                # [(ep_variant == "cuda")]
-    - libcusparse-dev {{ libcusparse }}            # [(ep_variant == "cuda")]
-    - libcufft-dev {{ libcufft }}                  # [(ep_variant == "cuda")]
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
     - cuda-nvrtc-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
-    # Needed for CUDA profiling
     - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cudnn                                        # [(ep_variant == "cuda")]
+    - libcublas-dev                                # [(ep_variant == "cuda")]
+    - libcurand-dev                                # [(ep_variant == "cuda")]
+    - libcusparse-dev                              # [(ep_variant == "cuda")]
+    - libcufft-dev                                 # [(ep_variant == "cuda")]
     - pip
     - python
     - setuptools
@@ -117,11 +117,11 @@ outputs:
         - {{ compiler('cxx') }}
         - {{ compiler('cuda') }}  # [(ep_variant == "cuda")]
       host:
-        - libcudnn-dev {{ cudnn }}                     # [(ep_variant == "cuda")]
-        - libcufft-dev {{ libcufft }}                  # [(ep_variant == "cuda")]
-        - libcublas-dev {{ cuda_compiler_version }}    # [(ep_variant == "cuda")]
-        - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
         - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
+        - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+        - libcudnn-dev                                 # [(ep_variant == "cuda")]
+        - libcufft-dev                                 # [(ep_variant == "cuda")]
+        - libcublas-dev                                # [(ep_variant == "cuda")]
       run_constrained:
         - onnxruntime <0a0       # [suffix == "-novec"]
     test:                        # [(ep_variant == "cpu")]
