@@ -6,10 +6,21 @@ cxx_compiler_version:      # [osx]
 # Containers from newer standards are used
 c_stdlib_version:          # [osx]
   - 13.3                   # [osx]
+
+# CUDA 13 CCCL headers require vs2022; CUDA 12 and CPU use vs2019
+c_compiler:                # [win]
+  - vs2019                 # [win]
+  - vs2019                 # [win]
+  - vs2022                 # [win]
+cxx_compiler:              # [win]
+  - vs2019                 # [win]
+  - vs2019                 # [win]
+  - vs2022                 # [win]
+
 cuda_compiler_version:
   - 12.9
-libcufft:
-  - 11
+  - 12.9
+  - 13.1
 
 suffix:
   - ""
@@ -17,3 +28,11 @@ suffix:
 ep_variant:
   - "cuda"                 # [linux64 or win64]
   - "cpu"
+  - "cuda"                 # [linux64 or win64]
+
+zip_keys:                  # [win or linux]
+  -                        # [win or linux]
+    - cuda_compiler_version  # [win or linux]
+    - ep_variant             # [win or linux]
+    - c_compiler             # [win]
+    - cxx_compiler           # [win]
