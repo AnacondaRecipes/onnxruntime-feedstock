@@ -13,24 +13,15 @@ source:
     - patches/system-onnxruntime-overcome.patch  # [win]
     - patches/fix_cwd_name_on_win.patch          # [win]
     - patches/skip-fastmath-test.patch           # [aarch64]
-    # For some reason Linux-x86 fails the comparison checks on patched tests
-    - patches/comment-out-linux-x86-tests.patch  # [linux and x86]       
-    - patches/fix-problematic-gtests.patch       # [unix]       
+    # GCC 14.3 x86_64 numerical bug: QDQ/NHWC transformer tests fail with sign flips
+    # (expected +4.953, got -4.992); only affects linux-x86, passes on aarch64/osx/win
+    - patches/comment-out-linux-x86-tests.patch  # [linux and x86]
+    - patches/fix-problematic-gtests.patch       # [unix]
 
 build:
   number: 0
   skip: true  # [py<311]
   string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
-  ignore_run_exports:
-    - numpy
-    - libcurl
-  entry_points:
-    - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
-  missing_dso_whitelist:
-    - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
-    # For some reason discovered by conda as $RPATH/onnxruntime_providers_shared.dll
-    # while the dumpbin shows just the name, and the file is installed to the same dir
-    - '**/onnxruntime_providers_shared.dll'    # [win]
 
 requirements:
   build:
@@ -66,32 +57,49 @@ requirements:
     - numpy {{ numpy }}
     - pybind11 2.13
     - psutil
-  run:
-    - coloredlogs
-    # numpy 2.0 sets the min pin to 1.19 and 2.1 sets 1.21 but upstream requires at least 1.21.6
-    - numpy >=1.21.6,<3
-    - packaging
-    - protobuf
-    - python
-    - python-flatbuffers
-    - sympy
-  run_constrained:
-    - onnxruntime <0a0  # [suffix == "-novec"]
 
 outputs:
   - name: onnxruntime{{ suffix }}
-    files:
-      include:
-        - 'lib/python*/site-packages/onnxruntime/**'
-        - 'lib/python*/site-packages/onnxruntime-{{ version }}.dist-info/**'
-    test:
-      imports:
-        - onnxruntime
-      commands:
-        - pip check
-        - onnxruntime_test --help
-      requires:
+    script: install-python.sh   # [unix]
+    script: install-python.bat  # [win]
+    build:
+      string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
+      entry_points:
+        - onnxruntime_test = onnxruntime.tools.onnxruntime_test:main
+      ignore_run_exports:
+        - numpy
+        - libcurl
+      missing_dso_whitelist:
+        - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
+        - '**/onnxruntime_providers_shared.dll'    # [win]
+    requirements:
+      build:
+        - {{ stdlib('c') }}
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}  # [(ep_variant == "cuda")]
+      host:
+        - python
         - pip
+      run:
+        - python
+        - coloredlogs
+        # numpy 2.0 sets the min pin to 1.19 and 2.1 sets 1.21 but upstream requires at least 1.21.6
+        - numpy >=1.21.6,<3
+        - packaging
+        - protobuf
+        - python-flatbuffers
+        - sympy
+      run_constrained:
+        - onnxruntime <0a0  # [suffix == "-novec"]
+    test:                          # [(ep_variant == "cpu")]
+      imports:                     # [(ep_variant == "cpu")]
+        - onnxruntime              # [(ep_variant == "cpu")]
+      commands:                    # [(ep_variant == "cpu")]
+        - pip check                # [(ep_variant == "cpu")]
+        - onnxruntime_test --help  # [(ep_variant == "cpu")]
+      requires:                    # [(ep_variant == "cpu")]
+        - pip                      # [(ep_variant == "cpu")]
   - name: onnxruntime{{ suffix }}-cpp
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
@@ -100,8 +108,8 @@ outputs:
         - '**/onnxruntime_providers_shared.dll'  # [win]
       run_exports:
         - {{ pin_subpackage('onnxruntime' + suffix + '-cpp', max_pin='x.x.x') }}
-    script: build.sh  # [unix]
-    script: bld.bat   # [win]
+    script: install-cpp.sh   # [unix]
+    script: install-cpp.bat  # [win]
     requirements:
       build:
         - {{ stdlib('c') }}

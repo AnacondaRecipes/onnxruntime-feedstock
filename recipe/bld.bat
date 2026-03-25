@@ -3,26 +3,6 @@
 set "BUILD_DIR=%TEMP%\b"
 set cmake_extra_defines="EIGEN_MPL2_ONLY=ON onnxruntime_USE_COREML=OFF onnxruntime_BUILD_SHARED_LIB=ON onnxruntime_BUILD_UNIT_TESTS=ON CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% CMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON"
 
-:: Check if PKG_NAME contains "-cpp"
-echo %PKG_NAME% | findstr /C:"-cpp" >nul
-if %errorlevel% == 0 (
-    setlocal enabledelayedexpansion
-    mkdir "%LIBRARY_INC%\onnxruntime"
-    mkdir "%LIBRARY_LIB%"
-    mkdir "%LIBRARY_BIN%"
-    robocopy %SRC_DIR%\include\onnxruntime "%LIBRARY_INC%\onnxruntime" /E /NFL /NDL /NJH /NJS
-    if %errorlevel% leq 7 set errorlevel=0
-    copy /Y %BUILD_DIR%\Release\onnxruntime_conda.lib "%LIBRARY_LIB%"
-    copy /Y %BUILD_DIR%\Release\onnxruntime_conda.dll "%LIBRARY_BIN%"
-    if "%ep_variant%" == "cuda" (
-        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_shared.lib "%LIBRARY_LIB%"
-        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_shared.dll "%LIBRARY_BIN%"
-        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_cuda.lib "%LIBRARY_LIB%"
-        copy /Y %BUILD_DIR%\Release\onnxruntime_providers_cuda.dll "%LIBRARY_BIN%"
-    )
-    exit 0
-)
-
 if exist "%BUILD_DIR%" rmdir /s /q "%BUILD_DIR%"
 mkdir "%BUILD_DIR%"
 
@@ -53,8 +33,3 @@ if "%ep_variant%" == "cuda" (
     %RUN_TESTS% ^
     %CUDA_ARGS%
 if errorlevel 1 exit 1
-
-for %%F in (%BUILD_DIR%\Release\dist\onnxruntime*.whl) do (
-    %PYTHON% -m pip install --no-deps --no-build-isolation -vvv %%F
-    if errorlevel 1 exit 1
-)

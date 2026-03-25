@@ -4,25 +4,7 @@ set -exuo pipefail
 
 export BUILD_DIR="build"
 
-if [[ ${PKG_NAME} == *"-cpp"* ]]; then
-    mkdir -p "${PREFIX}/include"
-    mkdir -p "${PREFIX}/lib"
-    cp -pr ${SRC_DIR}/include/onnxruntime "${PREFIX}/include/"
-
-    if [[ -n "${OSX_ARCH:+yes}" ]]; then
-        install ${BUILD_DIR}/Release/libonnxruntime.*dylib "${PREFIX}/lib"
-    else
-        install ${BUILD_DIR}/Release/libonnxruntime.so* "${PREFIX}/lib"
-        if [[ "${ep_variant:-}" == "cuda" ]]; then
-            install ${BUILD_DIR}/Release/libonnxruntime_providers_shared.so* "${PREFIX}/lib"
-            install ${BUILD_DIR}/Release/libonnxruntime_providers_cuda.so* "${PREFIX}/lib"
-        fi
-    fi
-
-    exit 0
-fi
-
-if [[ "${PKG_NAME}" == "onnxruntime-novec" ]]; then
+if [[ "${PKG_NAME}" == *"-novec"* ]]; then
     DONT_VECTORIZE="ON"
 else
     DONT_VECTORIZE="OFF"
@@ -85,17 +67,3 @@ ${PYTHON} ${SRC_DIR}/tools/ci_build/build.py \
     --skip_submodule_sync \
     ${RUN_TESTS} \
     ${CUDA_ARGS}
-
-for whl_file in $SRC_DIR/${BUILD_DIR}/Release/dist/onnxruntime*.whl; do
-    ${PYTHON} -m pip install --no-deps --no-build-isolation -vvv $whl_file
-done
-
-# Fix CUDA variant dist-info to match conda package name
-if [[ "${ep_variant:-}" == "cuda" ]]; then
-    for d in "${SP_DIR}"/onnxruntime_gpu-*.dist-info; do
-        [ -d "$d" ] || continue
-        new_d="${d/onnxruntime_gpu/onnxruntime}"
-        mv "$d" "$new_d"
-        sed -i 's/^Name: onnxruntime-gpu$/Name: onnxruntime/' "$new_d/METADATA"
-    done
-fi
