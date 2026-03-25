@@ -7,13 +7,14 @@ cxx_compiler_version:      # [osx]
 c_stdlib_version:          # [osx]
   - 13.3                   # [osx]
 
-# CUDA 13 CCCL headers require vs2022; CUDA 12 and CPU use vs2019
+# CUDA builds need vs2022 (nvcc vcvars discovery fails with vs2019 on workers);
+# CPU builds use vs2019
 c_compiler:                        # [win]
-  - vs2019                         # [win]
+  - vs2022                         # [win]
   - vs2019                         # [win]
   - vs2022                         # [win]
 cxx_compiler:                      # [win]
-  - vs2019                         # [win]
+  - vs2022                         # [win]
   - vs2019                         # [win]
   - vs2022                         # [win]
 
