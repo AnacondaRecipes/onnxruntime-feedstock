@@ -72,6 +72,14 @@ outputs:
       missing_dso_whitelist:
         - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
         - '**/onnxruntime_providers_shared.dll'    # [win]
+        - '**/libcublas*.so*'                      # [linux and (ep_variant == "cuda")]
+        - '**/libcufft*.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/libcudart*.so*'                      # [linux and (ep_variant == "cuda")]
+        - '**/libcudnn*.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/libcupti*.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/libcurand*.so*'                      # [linux and (ep_variant == "cuda")]
+        - '**/libcusparse*.so*'                    # [linux and (ep_variant == "cuda")]
+        - '**/libnvrtc*.so*'                       # [linux and (ep_variant == "cuda")]
     requirements:
       build:
         - {{ stdlib('c') }}

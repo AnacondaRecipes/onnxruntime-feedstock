@@ -1,2 +1,2 @@
 # CUDA builds compile 9 GPU architectures — need extended timeout
-task_timeout: 28800  # 8 hours
+task_timeout: 43200  # 12 hours
