@@ -72,6 +72,11 @@ outputs:
       missing_dso_whitelist:
         - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
         - '**/onnxruntime_providers_shared.dll'    # [win]
+        - '**/cublas*.dll'                         # [win and (ep_variant == "cuda")]
+        - '**/cufft*.dll'                          # [win and (ep_variant == "cuda")]
+        - '**/cupti*.dll'                          # [win and (ep_variant == "cuda")]
+        - '**/cudnn*.dll'                          # [win and (ep_variant == "cuda")]
+        - '**/cudart*.dll'                         # [win and (ep_variant == "cuda")]
         - '**/libcublas*.so*'                      # [linux and (ep_variant == "cuda")]
         - '**/libcufft*.so*'                       # [linux and (ep_variant == "cuda")]
         - '**/libcudart*.so*'                      # [linux and (ep_variant == "cuda")]
