@@ -1,15 +1,26 @@
-setlocal enabledelayedexpansion
+@echo on
 
-mkdir "%PREFIX%\Library\include\onnxruntime"
-mkdir "%PREFIX%\Library\lib"
-mkdir "%PREFIX%\Library\bin"
-xcopy /E /I include\onnxruntime "%PREFIX%\Library\include\onnxruntime"
-xcopy /Y build-ci\Release\onnxruntime_conda.lib "%PREFIX%\Library\lib\"
-xcopy /Y build-ci\Release\onnxruntime_conda.dll "%PREFIX%\Library\bin\"
+set "BUILD_DIR=%TEMP%\b"
+
+mkdir "%LIBRARY_INC%\onnxruntime" 2>nul
+mkdir "%LIBRARY_LIB%" 2>nul
+mkdir "%LIBRARY_BIN%" 2>nul
+
+robocopy %SRC_DIR%\include\onnxruntime "%LIBRARY_INC%\onnxruntime" /E /NFL /NDL /NJH /NJS
+if %errorlevel% leq 7 set errorlevel=0
+
+copy /Y %BUILD_DIR%\Release\onnxruntime_conda.lib "%LIBRARY_LIB%"
+if errorlevel 1 exit 1
+copy /Y %BUILD_DIR%\Release\onnxruntime_conda.dll "%LIBRARY_BIN%"
+if errorlevel 1 exit 1
 
 if "%ep_variant%" == "cuda" (
-    xcopy /Y build-ci\Release\onnxruntime_providers_shared.lib "%PREFIX%\Library\lib\"
-    xcopy /Y build-ci\Release\onnxruntime_providers_shared.dll "%PREFIX%\Library\bin\"
-    xcopy /Y build-ci\Release\onnxruntime_providers_cuda.lib "%PREFIX%\Library\lib\"
-    xcopy /Y build-ci\Release\onnxruntime_providers_cuda.dll "%PREFIX%\Library\bin\"
+    copy /Y %BUILD_DIR%\Release\onnxruntime_providers_shared.lib "%LIBRARY_LIB%"
+    if errorlevel 1 exit 1
+    copy /Y %BUILD_DIR%\Release\onnxruntime_providers_shared.dll "%LIBRARY_BIN%"
+    if errorlevel 1 exit 1
+    copy /Y %BUILD_DIR%\Release\onnxruntime_providers_cuda.lib "%LIBRARY_LIB%"
+    if errorlevel 1 exit 1
+    copy /Y %BUILD_DIR%\Release\onnxruntime_providers_cuda.dll "%LIBRARY_BIN%"
+    if errorlevel 1 exit 1
 )
