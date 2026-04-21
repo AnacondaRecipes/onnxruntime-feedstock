@@ -3,5 +3,7 @@ upstream_sources:
   - pypi:
       identifier: onnxruntime
     packages:
+      - onnxruntime
       - onnxruntime-cpp
+      - onnxruntime-novec
       - onnxruntime-novec-cpp
