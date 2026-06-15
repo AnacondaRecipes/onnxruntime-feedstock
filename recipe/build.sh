@@ -42,11 +42,37 @@ if [[ "${target_platform}" == "linux-64" ]]; then
     export GTEST_FILTER="-NhwcTransformerTests.ConvSplit"
 fi
 
+# Build parallelism (see cuda-build-tuning skill). CPU builds can use all
+# cores; CUDA builds are memory-bound (each nvcc template instantiation peaks
+# several GB), so size jobs to the worker's RAM, not its core count, and cap
+# per-nvcc threading + glibc arenas to avoid OOM. Replaces the old hardcoded
+# `--parallel 4`, which throttled CPU builds across the whole matrix.
+if [[ "${ep_variant:-}" == "cuda" ]]; then
+    export MALLOC_ARENA_MAX=2
+    if [[ "${target_platform}" == "linux-aarch64" ]]; then
+        PARALLEL_JOBS=4          # SBSA GPU workers are memory-bound
+        NVCC_THREADS=1
+    else
+        PARALLEL_JOBS=8          # x86 CUDA (was hardcoded 4)
+        NVCC_THREADS=2
+    fi
+else
+    PARALLEL_JOBS=${CPU_COUNT:-4}
+    NVCC_THREADS=1
+fi
+
 if [[ "${ep_variant:-}" == "cuda" ]]; then
     export CUDAHOSTCXX="${CXX}"                # If this isn't included, CUDA will use the system compiler to compile host
                                                 # files, rather than the one in the conda environment, resulting in compiler errors
-    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling --nvcc_threads 3"
-    cmake_extra_defines+=('CUDAToolkit_INCLUDE_DIR="${PREFIX}/targets/x86_64-linux/include/"')
+    # CUDA toolkit headers live under targets/<arch>-linux; NVIDIA uses the SBSA
+    # convention (sbsa-linux) for aarch64, not aarch64-linux.
+    if [[ "${target_platform}" == "linux-aarch64" ]]; then
+        CUDA_TARGET_DIR="sbsa-linux"
+    else
+        CUDA_TARGET_DIR="x86_64-linux"
+    fi
+    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling --nvcc_threads ${NVCC_THREADS}"
+    cmake_extra_defines+=("CUDAToolkit_INCLUDE_DIR=${PREFIX}/targets/${CUDA_TARGET_DIR}/include/")
     # Skipping all tests for CUDA variants, as they're crashing after passing
     # this is related to CUDA Execution Provider cleanup, which fails, as CI images are missing CUDA drivers
     # All the tests are passing locally on CUDA-enabled docker
@@ -68,7 +94,7 @@ ${PYTHON} ${SRC_DIR}/tools/ci_build/build.py \
     --update \
     --build \
     --clean \
-    --parallel 4 \
+    --parallel ${PARALLEL_JOBS} \
     --skip_pip_install \
     --skip_submodule_sync \
     ${RUN_TESTS} \
