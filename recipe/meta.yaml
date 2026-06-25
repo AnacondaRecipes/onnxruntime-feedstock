@@ -19,7 +19,7 @@ source:
     - patches/fix-problematic-gtests.patch       # [unix]
 
 build:
-  number: 1
+  number: 2
   skip: true  # [py<311]
   string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
 
@@ -103,6 +103,8 @@ outputs:
         - protobuf
         - python-flatbuffers
         - sympy
+        # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
+        - __cuda            # [(ep_variant == "cuda")]
       run_constrained:
         - onnxruntime <0a0  # [suffix == "-novec"]
     test:                          # [(ep_variant == "cpu")]
@@ -135,6 +137,9 @@ outputs:
         - libcudnn-dev                                 # [(ep_variant == "cuda")]
         - libcufft-dev                                 # [(ep_variant == "cuda")]
         - libcublas-dev                                # [(ep_variant == "cuda")]
+      run:
+        # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
+        - __cuda                                       # [(ep_variant == "cuda")]
       run_constrained:
         - onnxruntime <0a0       # [suffix == "-novec"]
     test:                        # [(ep_variant == "cpu")]
