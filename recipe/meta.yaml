@@ -162,7 +162,7 @@ outputs:
 about:
   home: https://onnxruntime.ai
   license: MIT AND BSL-1.0
-  license_family: MIT
+  license_family: Other
   license_file: LICENSE
   summary: cross-platform, high performance ML inferencing and training accelerator
   description: |
