@@ -95,6 +95,14 @@ outputs:
       host:
         - python
         - pip
+        # CUDA libs used by the bundled CUDA EP: linked (cudart, cuBLAS, cuRAND, CUPTI)
+        # or dlopen'd since 1.28 (cuDNN, cuFFT); their run_exports supply the runtime deps
+        - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
+        - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+        - libcublas-dev                                # [(ep_variant == "cuda")]
+        - libcurand-dev                                # [(ep_variant == "cuda")]
+        - libcudnn-dev                                 # [(ep_variant == "cuda")]
+        - libcufft-dev                                 # [(ep_variant == "cuda")]
       run:
         - python
         # numpy 2.0 sets the min pin to 1.19 and 2.1 sets 1.21 but upstream requires at least 1.21.6
@@ -136,6 +144,7 @@ outputs:
         - libcudnn-dev                                 # [(ep_variant == "cuda")]
         - libcufft-dev                                 # [(ep_variant == "cuda")]
         - libcublas-dev                                # [(ep_variant == "cuda")]
+        - libcurand-dev                                # [(ep_variant == "cuda")]
       run:
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
         - __cuda                                       # [(ep_variant == "cuda")]
