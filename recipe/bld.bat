@@ -30,6 +30,7 @@ if "%ep_variant%" == "cuda" (
     --parallel 2 ^
     --skip_pip_install ^
     --skip_submodule_sync ^
+    --no_telemetry ^
     %RUN_TESTS% ^
     %CUDA_ARGS%
 if errorlevel 1 exit 1

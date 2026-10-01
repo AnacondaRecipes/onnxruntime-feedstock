@@ -97,5 +97,6 @@ ${PYTHON} ${SRC_DIR}/tools/ci_build/build.py \
     --parallel ${PARALLEL_JOBS} \
     --skip_pip_install \
     --skip_submodule_sync \
+    --no_telemetry \
     ${RUN_TESTS} \
     ${CUDA_ARGS}
