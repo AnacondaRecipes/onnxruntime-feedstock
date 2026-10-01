@@ -11,12 +11,12 @@ source:
   patches:
     - patches/remove-problematic-win-test.patch  # [win]
     - patches/system-onnxruntime-overcome.patch  # [win]
-    - patches/fix_cwd_name_on_win.patch  # [win]
-    - patches/skip-fastmath-test.patch  # [aarch64]
+    - patches/fix_cwd_name_on_win.patch          # [win]
+    - patches/skip-fastmath-test.patch           # [aarch64]
     # GCC 14.3 x86_64 numerical bug: QDQ/NHWC transformer tests fail with sign flips
     # (expected +4.953, got -4.992); only affects linux-x86, passes on aarch64/osx/win
     - patches/comment-out-linux-x86-tests.patch  # [linux and x86]
-    - patches/fix-problematic-gtests.patch  # [unix]
+    - patches/fix-problematic-gtests.patch       # [unix]
 
 build:
   number: 0
@@ -32,20 +32,20 @@ requirements:
     - cmake
     - ninja-base
   host:
-    - gtest
+    - gtest {{ gtest }}
     - gmock
     # GPU requirements — pin toolkit packages to cuda_compiler_version,
     # let solver pick library versions via cuda-version constraint
-    - cuda-nvcc {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-    - cuda-version {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
+    - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
+    - cuda-version {{ cuda_compiler_version }}     # [(ep_variant == "cuda")]
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-    - cuda-nvrtc-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-    - cuda-cupti-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-    - cudnn  # [(ep_variant == "cuda")]
-    - libcublas-dev  # [(ep_variant == "cuda")]
-    - libcurand-dev  # [(ep_variant == "cuda")]
-    - libcusparse-dev  # [(ep_variant == "cuda")]
-    - libcufft-dev  # [(ep_variant == "cuda")]
+    - cuda-nvrtc-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+    - cudnn                                        # [(ep_variant == "cuda")]
+    - libcublas-dev                                # [(ep_variant == "cuda")]
+    - libcurand-dev                                # [(ep_variant == "cuda")]
+    - libcusparse-dev                              # [(ep_variant == "cuda")]
+    - libcufft-dev                                 # [(ep_variant == "cuda")]
     - pip
     - python
     - setuptools
@@ -55,12 +55,13 @@ requirements:
     - optional-lite 3.5.0
     - zlib {{ zlib }}
     - numpy {{ numpy }}
-    - pybind11 2.13
+    - pybind11 3.1
+    - pybind11-abi
     - psutil
 
 outputs:
   - name: onnxruntime{{ suffix }}
-    script: install-python.sh  # [unix]
+    script: install-python.sh   # [unix]
     script: install-python.bat  # [win]
     build:
       string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
@@ -70,21 +71,21 @@ outputs:
         - numpy
         - libcurl
       missing_dso_whitelist:
-        - "**/api-ms-win-core-path-l1-1-0.dll"  # [win]
-        - "**/onnxruntime_providers_shared.dll"  # [win]
-        - "**/cublas*.dll"  # [win and (ep_variant == "cuda")]
-        - "**/cufft*.dll"  # [win and (ep_variant == "cuda")]
-        - "**/cupti*.dll"  # [win and (ep_variant == "cuda")]
-        - "**/cudnn*.dll"  # [win and (ep_variant == "cuda")]
-        - "**/cudart*.dll"  # [win and (ep_variant == "cuda")]
-        - "**/libcublas*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libcufft*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libcudart*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libcudnn*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libcupti*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libcurand*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libcusparse*.so*"  # [linux and (ep_variant == "cuda")]
-        - "**/libnvrtc*.so*"  # [linux and (ep_variant == "cuda")]
+        - '**/api-ms-win-core-path-l1-1-0.dll'     # [win]
+        - '**/onnxruntime_providers_shared.dll'    # [win]
+        - '**/cublas*.dll'                         # [win and (ep_variant == "cuda")]
+        - '**/cufft*.dll'                          # [win and (ep_variant == "cuda")]
+        - '**/cupti*.dll'                          # [win and (ep_variant == "cuda")]
+        - '**/cudnn*.dll'                          # [win and (ep_variant == "cuda")]
+        - '**/cudart*.dll'                         # [win and (ep_variant == "cuda")]
+        - '**/libcublas*.so*'                      # [linux and (ep_variant == "cuda")]
+        - '**/libcufft*.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/libcudart*.so*'                      # [linux and (ep_variant == "cuda")]
+        - '**/libcudnn*.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/libcupti*.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/libcurand*.so*'                      # [linux and (ep_variant == "cuda")]
+        - '**/libcusparse*.so*'                    # [linux and (ep_variant == "cuda")]
+        - '**/libnvrtc*.so*'                       # [linux and (ep_variant == "cuda")]
     requirements:
       build:
         - {{ stdlib('c') }}
@@ -96,34 +97,32 @@ outputs:
         - pip
       run:
         - python
-        - coloredlogs
         # numpy 2.0 sets the min pin to 1.19 and 2.1 sets 1.21 but upstream requires at least 1.21.6
         - numpy >=1.21.6,<3
         - packaging
-        - protobuf
+        - protobuf >=4.25.8
         - python-flatbuffers
-        - sympy
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
-        - __cuda  # [(ep_variant == "cuda")]
+        - __cuda            # [(ep_variant == "cuda")]
       run_constrained:
         - onnxruntime <0a0  # [suffix == "-novec"]
-    test:  # [(ep_variant == "cpu")]
-      imports:  # [(ep_variant == "cpu")]
-        - onnxruntime  # [(ep_variant == "cpu")]
-      commands:  # [(ep_variant == "cpu")]
-        - pip check  # [(ep_variant == "cpu")]
+    test:                          # [(ep_variant == "cpu")]
+      imports:                     # [(ep_variant == "cpu")]
+        - onnxruntime              # [(ep_variant == "cpu")]
+      commands:                    # [(ep_variant == "cpu")]
+        - pip check                # [(ep_variant == "cpu")]
         - onnxruntime_test --help  # [(ep_variant == "cpu")]
-      requires:  # [(ep_variant == "cpu")]
-        - pip  # [(ep_variant == "cpu")]
+      requires:                    # [(ep_variant == "cpu")]
+        - pip                      # [(ep_variant == "cpu")]
   - name: onnxruntime{{ suffix }}-cpp
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
       missing_dso_whitelist:
-        - "**/api-ms-win-core-path-l1-1-0.dll"  # [win]
-        - "**/onnxruntime_providers_shared.dll"  # [win]
+        - '**/api-ms-win-core-path-l1-1-0.dll'   # [win]
+        - '**/onnxruntime_providers_shared.dll'  # [win]
       run_exports:
         - {{ pin_subpackage('onnxruntime' + suffix + '-cpp', max_pin='x.x.x') }}
-    script: install-cpp.sh  # [unix]
+    script: install-cpp.sh   # [unix]
     script: install-cpp.bat  # [win]
     requirements:
       build:
@@ -133,31 +132,31 @@ outputs:
         - {{ compiler('cuda') }}  # [(ep_variant == "cuda")]
       host:
         - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-        - cuda-cupti-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
-        - libcudnn-dev  # [(ep_variant == "cuda")]
-        - libcufft-dev  # [(ep_variant == "cuda")]
-        - libcublas-dev  # [(ep_variant == "cuda")]
+        - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+        - libcudnn-dev                                 # [(ep_variant == "cuda")]
+        - libcufft-dev                                 # [(ep_variant == "cuda")]
+        - libcublas-dev                                # [(ep_variant == "cuda")]
       run:
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
-        - __cuda  # [(ep_variant == "cuda")]
+        - __cuda                                       # [(ep_variant == "cuda")]
       run_constrained:
-        - onnxruntime <0a0  # [suffix == "-novec"]
-    test:  # [(ep_variant == "cpu")]
-      requires:  # [(ep_variant == "cpu")]
-        - {{ stdlib('c') }}  # [(ep_variant == "cpu")]
+        - onnxruntime <0a0       # [suffix == "-novec"]
+    test:                        # [(ep_variant == "cpu")]
+      requires:                  # [(ep_variant == "cpu")]
+        - {{ stdlib('c') }}      # [(ep_variant == "cpu")]
         - {{ compiler('cxx') }}  # [(ep_variant == "cpu")]
-      files:  # [(ep_variant == "cpu")]
-        - test.cpp  # [(ep_variant == "cpu")]
-        - run_cpp_test.bat  # [(ep_variant == "cpu")]
-      commands:  # [(ep_variant == "cpu")]
+      files:                     # [(ep_variant == "cpu")]
+        - test.cpp               # [(ep_variant == "cpu")]
+        - run_cpp_test.bat       # [(ep_variant == "cpu")]
+      commands:                  # [(ep_variant == "cpu")]
         - test -f $PREFIX/include/onnxruntime/core/session/onnxruntime_cxx_api.h  # [unix and (ep_variant == "cpu")]
-        - test -f $PREFIX/lib/libonnxruntime${SHLIB_EXT}  # [unix and (ep_variant == "cpu")]
+        - test -f $PREFIX/lib/libonnxruntime${SHLIB_EXT}                          # [unix and (ep_variant == "cpu")]
         - if not exist %LIBRARY_INC%\\onnxruntime\\core\\session\\onnxruntime_cxx_api.h exit 1  # [win and (ep_variant == "cpu")]
-        - if not exist %LIBRARY_LIB%\\onnxruntime_conda.lib exit 1  # [win and (ep_variant == "cpu")]
-        - if not exist %LIBRARY_BIN%\\onnxruntime_conda.dll exit 1  # [win and (ep_variant == "cpu")]
-        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime test.cpp  # [linux and (ep_variant == "cpu")]
+        - if not exist %LIBRARY_LIB%\\onnxruntime_conda.lib exit 1                              # [win and (ep_variant == "cpu")]
+        - if not exist %LIBRARY_BIN%\\onnxruntime_conda.dll exit 1                              # [win and (ep_variant == "cpu")]
+        - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime test.cpp                               # [linux and (ep_variant == "cpu")]
         - $CXX $CXXFLAGS -I$PREFIX/include/ -L$PREFIX/lib/ -lonnxruntime -Wl,-rpath,$CONDA_PREFIX/lib test.cpp  # [osx and (ep_variant == "cpu")]
-        - ./a.out  # [unix and (ep_variant == "cpu")]
+        - ./a.out                  # [unix and (ep_variant == "cpu")]
         - call .\run_cpp_test.bat  # [win and (ep_variant == "cpu")]
 
 about:

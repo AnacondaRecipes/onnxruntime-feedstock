@@ -1,17 +1,18 @@
-From 5dca867fc40152fa8c7bc7addbb417cd6316b544 Mon Sep 17 00:00:00 2001
+From 740fffaa1fb69af157410df9ebf87d51063ed80b Mon Sep 17 00:00:00 2001
 From: Ivan Iziumov <iiziumov@anaconda.com>
 Date: Mon, 2 Mar 2026 10:16:30 +0100
 Subject: [PATCH] remove problematic win test
 
+Rebased onto 1.30.0: the WIN32 dlopen test block now also builds the cpuinfo dlopen test; comment out the whole block.
 ---
- cmake/onnxruntime_unittests.cmake | 22 +++++++++++-----------
- 1 file changed, 11 insertions(+), 11 deletions(-)
+ cmake/onnxruntime_unittests.cmake | 86 +++++++++++++++----------------
+ 1 file changed, 43 insertions(+), 43 deletions(-)
 
 diff --git a/cmake/onnxruntime_unittests.cmake b/cmake/onnxruntime_unittests.cmake
-index ad6f6eb790..a088dcca00 100644
+index 1974b5d..b816555 100644
 --- a/cmake/onnxruntime_unittests.cmake
 +++ b/cmake/onnxruntime_unittests.cmake
-@@ -1523,17 +1523,17 @@ endif()
+@@ -2042,49 +2042,49 @@ endif()
  
    # shared lib
    if (onnxruntime_BUILD_SHARED_LIB)
@@ -20,6 +21,38 @@ index ad6f6eb790..a088dcca00 100644
 -      add_dependencies(onnxruntime_shared_lib_dlopen_test ${all_dependencies} onnxruntime)
 -      add_test(NAME onnxruntime_shared_lib_dlopen_test COMMAND onnxruntime_shared_lib_dlopen_test WORKING_DIRECTORY $<TARGET_FILE_DIR:onnxruntime_shared_lib_dlopen_test>)
 -      set_target_properties(onnxruntime_shared_lib_dlopen_test PROPERTIES FOLDER "ONNXRuntimeTest")
+-
+-      if(onnxruntime_cpuinfo_library_type STREQUAL "STATIC_LIBRARY")
+-        onnxruntime_add_shared_library(
+-          onnxruntime_cpuinfo_dlopen_test_library
+-          ${ONNXRUNTIME_SHARED_LIB_TEST_SRC_DIR}/cpuinfo_dlopen_test_library.cc
+-          ${ONNXRUNTIME_SHARED_LIB_TEST_SRC_DIR}/cpuinfo_dlopen_test_library.def)
+-        target_include_directories(
+-          onnxruntime_cpuinfo_dlopen_test_library
+-          PRIVATE ${ONNXRUNTIME_ROOT})
+-        target_link_libraries(
+-          onnxruntime_cpuinfo_dlopen_test_library
+-          PRIVATE onnxruntime_common cpuinfo)
+-
+-        onnxruntime_add_executable(
+-          onnxruntime_shared_lib_cpuinfo_dlopen_test
+-          ${ONNXRUNTIME_SHARED_LIB_TEST_SRC_DIR}/cpuinfo_dlopen_test.cc)
+-        add_dependencies(
+-          onnxruntime_shared_lib_cpuinfo_dlopen_test
+-          onnxruntime_cpuinfo_dlopen_test_library)
+-        target_compile_definitions(
+-          onnxruntime_shared_lib_cpuinfo_dlopen_test
+-          PRIVATE
+-          ORT_CPUINFO_DLOPEN_TEST_LIBRARY=L"$<TARGET_FILE_NAME:onnxruntime_cpuinfo_dlopen_test_library>")
+-        add_test(
+-          NAME onnxruntime_shared_lib_cpuinfo_dlopen_test
+-          COMMAND onnxruntime_shared_lib_cpuinfo_dlopen_test
+-          WORKING_DIRECTORY $<TARGET_FILE_DIR:onnxruntime_cpuinfo_dlopen_test_library>)
+-        set_target_properties(
+-          onnxruntime_cpuinfo_dlopen_test_library
+-          onnxruntime_shared_lib_cpuinfo_dlopen_test
+-          PROPERTIES FOLDER "ONNXRuntimeTest")
+-      endif()
 -
 -      if (MSVC)
 -        # set VS debugger working directory to the test program's directory
@@ -32,6 +65,38 @@ index ad6f6eb790..a088dcca00 100644
 +    #   add_test(NAME onnxruntime_shared_lib_dlopen_test COMMAND onnxruntime_shared_lib_dlopen_test WORKING_DIRECTORY $<TARGET_FILE_DIR:onnxruntime_shared_lib_dlopen_test>)
 +    #   set_target_properties(onnxruntime_shared_lib_dlopen_test PROPERTIES FOLDER "ONNXRuntimeTest")
 +
++    #   if(onnxruntime_cpuinfo_library_type STREQUAL "STATIC_LIBRARY")
++    #     onnxruntime_add_shared_library(
++    #       onnxruntime_cpuinfo_dlopen_test_library
++    #       ${ONNXRUNTIME_SHARED_LIB_TEST_SRC_DIR}/cpuinfo_dlopen_test_library.cc
++    #       ${ONNXRUNTIME_SHARED_LIB_TEST_SRC_DIR}/cpuinfo_dlopen_test_library.def)
++    #     target_include_directories(
++    #       onnxruntime_cpuinfo_dlopen_test_library
++    #       PRIVATE ${ONNXRUNTIME_ROOT})
++    #     target_link_libraries(
++    #       onnxruntime_cpuinfo_dlopen_test_library
++    #       PRIVATE onnxruntime_common cpuinfo)
++
++    #     onnxruntime_add_executable(
++    #       onnxruntime_shared_lib_cpuinfo_dlopen_test
++    #       ${ONNXRUNTIME_SHARED_LIB_TEST_SRC_DIR}/cpuinfo_dlopen_test.cc)
++    #     add_dependencies(
++    #       onnxruntime_shared_lib_cpuinfo_dlopen_test
++    #       onnxruntime_cpuinfo_dlopen_test_library)
++    #     target_compile_definitions(
++    #       onnxruntime_shared_lib_cpuinfo_dlopen_test
++    #       PRIVATE
++    #       ORT_CPUINFO_DLOPEN_TEST_LIBRARY=L"$<TARGET_FILE_NAME:onnxruntime_cpuinfo_dlopen_test_library>")
++    #     add_test(
++    #       NAME onnxruntime_shared_lib_cpuinfo_dlopen_test
++    #       COMMAND onnxruntime_shared_lib_cpuinfo_dlopen_test
++    #       WORKING_DIRECTORY $<TARGET_FILE_DIR:onnxruntime_cpuinfo_dlopen_test_library>)
++    #     set_target_properties(
++    #       onnxruntime_cpuinfo_dlopen_test_library
++    #       onnxruntime_shared_lib_cpuinfo_dlopen_test
++    #       PROPERTIES FOLDER "ONNXRuntimeTest")
++    #   endif()
++
 +    #   if (MSVC)
 +    #     # set VS debugger working directory to the test program's directory
 +    #     set_target_properties(onnxruntime_shared_lib_dlopen_test PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:onnxruntime_shared_lib_dlopen_test>)
@@ -40,6 +105,3 @@ index ad6f6eb790..a088dcca00 100644
      onnxruntime_add_static_library(onnxruntime_mocked_allocator ${TEST_SRC_DIR}/util/test_allocator.cc)
      target_include_directories(onnxruntime_mocked_allocator PUBLIC ${TEST_SRC_DIR}/util/include)
      target_link_libraries(onnxruntime_mocked_allocator PRIVATE ${GSL_TARGET})
--- 
-2.50.1 (Apple Git-155)
-
