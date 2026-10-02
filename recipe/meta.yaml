@@ -104,12 +104,11 @@ outputs:
       host:
         - python
         - pip
-        # CUDA libs used by the bundled CUDA EP: linked (cudart, cuBLAS, cuRAND, CUPTI)
-        # or dlopen'd since 1.28 (cuDNN, cuFFT); their run_exports supply the runtime deps
+        # CUDA libs used by the bundled CUDA EP: linked (cudart, cuBLAS, CUPTI) or dlopen'd
+        # since 1.28 (cuDNN, cuFFT); their run_exports supply the runtime deps
         - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
         - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
         - libcublas-dev                                # [(ep_variant == "cuda")]
-        - libcurand-dev                                # [(ep_variant == "cuda")]
         - libcudnn-dev                                 # [(ep_variant == "cuda")]
         - libcufft-dev                                 # [(ep_variant == "cuda")]
       run:
@@ -156,7 +155,6 @@ outputs:
         - libcudnn-dev                                 # [(ep_variant == "cuda")]
         - libcufft-dev                                 # [(ep_variant == "cuda")]
         - libcublas-dev                                # [(ep_variant == "cuda")]
-        - libcurand-dev                                # [(ep_variant == "cuda")]
       run:
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
         - __cuda                                       # [(ep_variant == "cuda")]
