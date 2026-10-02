@@ -17,6 +17,10 @@ source:
     # (expected +4.953, got -4.992); only affects linux-x86, passes on aarch64/osx/win
     - patches/comment-out-linux-x86-tests.patch  # [linux and x86]
     - patches/fix-problematic-gtests.patch       # [unix]
+    # New 1.28+ python tests import onnx without the skip guard their siblings have;
+    # onnx is not in the build env (from conda-forge's feedstock)
+    - patches/skip-adapter-string-tensor-test-without-onnx.patch
+    - patches/guard-onnx-import-in-autoep-test.patch
 
 build:
   number: 0
@@ -32,8 +36,10 @@ requirements:
     - cmake
     - ninja-base
   host:
-    - gtest {{ gtest }}
-    - gmock
+    # Upstream's tested googletest is v1.17.0 (cmake/deps.txt); gtest 1.18 ICEs GCC 14.3 on
+    # linux-aarch64 (gtest-port.h:1171 in model_tests.cc)
+    - gtest 1.17.0  # analint: host_section_needs_exact_pinnings  # deviates from CBC 1.18.0, see above
+    - gmock 1.17.0
     # GPU requirements — pin toolkit packages to cuda_compiler_version,
     # let solver pick library versions via cuda-version constraint
     - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
