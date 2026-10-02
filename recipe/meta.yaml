@@ -92,6 +92,9 @@ outputs:
         - '**/libcurand*.so*'                      # [linux and (ep_variant == "cuda")]
         - '**/libcusparse*.so*'                    # [linux and (ep_variant == "cuda")]
         - '**/libnvrtc*.so*'                       # [linux and (ep_variant == "cuda")]
+        # CUDA driver (CUDA::cuda_driver, newly linked by the CUDA EP vs 1.24); provided by the NVIDIA driver
+        - '**/libcuda.so*'                         # [linux and (ep_variant == "cuda")]
+        - '**/nvcuda.dll'                          # [win and (ep_variant == "cuda")]
     requirements:
       build:
         - {{ stdlib('c') }}
@@ -134,6 +137,9 @@ outputs:
       missing_dso_whitelist:
         - '**/api-ms-win-core-path-l1-1-0.dll'   # [win]
         - '**/onnxruntime_providers_shared.dll'  # [win]
+        # CUDA driver, provided by the NVIDIA driver (see the python output)
+        - '**/libcuda.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/nvcuda.dll'                        # [win and (ep_variant == "cuda")]
       run_exports:
         - {{ pin_subpackage('onnxruntime' + suffix + '-cpp', max_pin='x.x.x') }}
     script: install-cpp.sh   # [unix]
