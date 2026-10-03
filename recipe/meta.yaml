@@ -1,4 +1,7 @@
 {% set name = "onnxruntime" %}
+# Non-empty CBC axis: an empty-string variant value ("") is ignored by conda-build
+# when passed via -m, which made the default task also build the -novec variant
+{% set suffix = "-novec" if vec_variant == "novec" else "" %}
 {% set version = "1.30.0" %}
 
 package:
@@ -121,7 +124,7 @@ outputs:
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
         - __cuda            # [(ep_variant == "cuda")]
       run_constrained:
-        - onnxruntime <0a0  # [suffix == "-novec"]
+        - onnxruntime <0a0  # [vec_variant == "novec"]
     test:                          # [(ep_variant == "cpu")]
       imports:                     # [(ep_variant == "cpu")]
         - onnxruntime              # [(ep_variant == "cpu")]
@@ -159,7 +162,7 @@ outputs:
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
         - __cuda                                       # [(ep_variant == "cuda")]
       run_constrained:
-        - onnxruntime <0a0       # [suffix == "-novec"]
+        - onnxruntime <0a0       # [vec_variant == "novec"]
     test:                        # [(ep_variant == "cpu")]
       requires:                  # [(ep_variant == "cpu")]
         - {{ stdlib('c') }}      # [(ep_variant == "cpu")]

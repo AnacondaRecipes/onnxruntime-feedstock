@@ -10,12 +10,19 @@ else
     DONT_VECTORIZE="OFF"
 fi
 
+# Unit tests only run for CPU variants; CUDA variants pass --skip_tests, so don't compile them
+if [[ "${ep_variant:-}" == "cuda" ]]; then
+    BUILD_UNIT_TESTS="OFF"
+else
+    BUILD_UNIT_TESTS="ON"
+fi
+
 cmake_extra_defines=("EIGEN_MPL2_ONLY=ON" \
 		             "FLATBUFFERS_BUILD_FLATC=OFF" \
 	                 "onnxruntime_USE_COREML=OFF" \
                      "onnxruntime_DONT_VECTORIZE=$DONT_VECTORIZE" \
                      "onnxruntime_BUILD_SHARED_LIB=ON" \
-                     "onnxruntime_BUILD_UNIT_TESTS=ON" \
+                     "onnxruntime_BUILD_UNIT_TESTS=$BUILD_UNIT_TESTS" \
                      "CMAKE_PREFIX_PATH=$PREFIX" \
                      "GTest_ROOT=${PREFIX}" \
                      "CMAKE_FIND_ROOT_PATH=${PREFIX}" \

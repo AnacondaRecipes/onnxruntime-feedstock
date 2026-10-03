@@ -18,9 +18,9 @@ cuda_compiler_version:
   - 12.9
   - 13.0                           # [linux64 or aarch64 or win64]
 
-suffix:
-  - ""
-  - "-novec"
+vec_variant:
+  - vec
+  - novec
 ep_variant:
   - "cuda"                         # [linux64 or aarch64 or win64]
   - "cpu"

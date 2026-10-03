@@ -1,7 +1,16 @@
 @echo on
 
 set "BUILD_DIR=%TEMP%\b"
-set cmake_extra_defines="EIGEN_MPL2_ONLY=ON onnxruntime_USE_COREML=OFF onnxruntime_BUILD_SHARED_LIB=ON onnxruntime_BUILD_UNIT_TESTS=ON CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% CMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON"
+set "DONT_VECTORIZE=OFF"
+if not "%PKG_NAME:-novec=%" == "%PKG_NAME%" set "DONT_VECTORIZE=ON"
+rem Unit tests only run for CPU variants; CUDA variants pass --skip_tests, so don't compile them
+set "BUILD_UNIT_TESTS=ON"
+set "PARALLEL_JOBS=4"
+if "%ep_variant%" == "cuda" (
+    set "BUILD_UNIT_TESTS=OFF"
+    set "PARALLEL_JOBS=2"
+)
+set cmake_extra_defines="EIGEN_MPL2_ONLY=ON onnxruntime_USE_COREML=OFF onnxruntime_BUILD_SHARED_LIB=ON onnxruntime_BUILD_UNIT_TESTS=%BUILD_UNIT_TESTS% onnxruntime_DONT_VECTORIZE=%DONT_VECTORIZE% CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% CMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON"
 
 if exist "%BUILD_DIR%" rmdir /s /q "%BUILD_DIR%"
 mkdir "%BUILD_DIR%"
@@ -27,7 +36,7 @@ if "%ep_variant%" == "cuda" (
     --update ^
     --build ^
     --clean ^
-    --parallel 2 ^
+    --parallel %PARALLEL_JOBS% ^
     --skip_pip_install ^
     --skip_submodule_sync ^
     --no_telemetry ^
