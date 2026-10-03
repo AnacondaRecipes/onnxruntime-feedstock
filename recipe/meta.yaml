@@ -125,20 +125,19 @@ outputs:
         - __cuda            # [(ep_variant == "cuda")]
       run_constrained:
         - onnxruntime <0a0  # [vec_variant == "novec"]
-    test:  # [not (win and (ep_variant == "cuda"))]
-      imports:  # [not (win and (ep_variant == "cuda"))]
-        - onnxruntime  # [not (win and (ep_variant == "cuda"))]
-      source_files:                                # [linux and (ep_variant == "cuda")]
-        - onnxruntime/test/testdata/mul_1.onnx     # [linux and (ep_variant == "cuda")]
-      commands:  # [not (win and (ep_variant == "cuda"))]
-        - pip check  # [not (win and (ep_variant == "cuda"))]
-        - onnxruntime_test --help  # [not (win and (ep_variant == "cuda"))]
-        # Win CUDA tests are skipped: no evidence those test tasks get a GPU (__cuda) worker
-        # Linux CUDA tests run on GPU workers: require the CUDA EP with CPU fallback disabled and
+    test:
+      imports:
+        - onnxruntime
+      source_files:                                # [ep_variant == "cuda"]
+        - onnxruntime/test/testdata/mul_1.onnx     # [ep_variant == "cuda"]
+      commands:
+        - pip check
+        - onnxruntime_test --help
+        # CUDA tests run on GPU workers (T4): require the CUDA EP with CPU fallback disabled and
         # check a real inference (mul_1.onnx computes Y = X * W, W = [1..6], so X = [1..6] gives squares)
-        - python -c "import numpy as np, onnxruntime as ort; o = ort.SessionOptions(); o.add_session_config_entry('session.disable_cpu_ep_fallback', '1'); s = ort.InferenceSession('onnxruntime/test/testdata/mul_1.onnx', o, providers=['CUDAExecutionProvider']); assert s.get_providers()[0] == 'CUDAExecutionProvider', s.get_providers(); x = np.arange(1, 7, dtype=np.float32).reshape(3, 2); np.testing.assert_array_equal(s.run(['Y'], dict(X=x))[0], x * x)"  # [linux and (ep_variant == "cuda")]
-      requires:  # [not (win and (ep_variant == "cuda"))]
-        - pip  # [not (win and (ep_variant == "cuda"))]
+        - python -c "import numpy as np, onnxruntime as ort; o = ort.SessionOptions(); o.add_session_config_entry('session.disable_cpu_ep_fallback', '1'); s = ort.InferenceSession('onnxruntime/test/testdata/mul_1.onnx', o, providers=['CUDAExecutionProvider']); assert s.get_providers()[0] == 'CUDAExecutionProvider', s.get_providers(); x = np.arange(1, 7, dtype=np.float32).reshape(3, 2); np.testing.assert_array_equal(s.run(['Y'], dict(X=x))[0], x * x)"  # [ep_variant == "cuda"]
+      requires:
+        - pip
   - name: onnxruntime{{ suffix }}-cpp
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
