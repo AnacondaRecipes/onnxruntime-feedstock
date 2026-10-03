@@ -57,10 +57,10 @@ fi
 if [[ "${ep_variant:-}" == "cuda" ]]; then
     export MALLOC_ARENA_MAX=2
     if [[ "${target_platform}" == "linux-aarch64" ]]; then
-        PARALLEL_JOBS=4          # SBSA GPU workers are memory-bound
+        PARALLEL_JOBS=5          # SBSA GPU workers: 4 jobs peaked at 36.4/62 GiB in 1.30
         NVCC_THREADS=1
     else
-        PARALLEL_JOBS=8          # x86 CUDA (was hardcoded 4)
+        PARALLEL_JOBS=6          # x86 CUDA: 8 jobs peaked at 61/62 GiB and lost workers (claim-expired)
         NVCC_THREADS=2
     fi
 else
@@ -78,7 +78,7 @@ if [[ "${ep_variant:-}" == "cuda" ]]; then
     else
         CUDA_TARGET_DIR="x86_64-linux"
     fi
-    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling --nvcc_threads ${NVCC_THREADS}"
+    CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling --nvcc_threads ${NVCC_THREADS} --flash_nvcc_threads 1"
     cmake_extra_defines+=("CUDAToolkit_INCLUDE_DIR=${PREFIX}/targets/${CUDA_TARGET_DIR}/include/")
     # Skipping all tests for CUDA variants, as they're crashing after passing
     # this is related to CUDA Execution Provider cleanup, which fails, as CI images are missing CUDA drivers
@@ -88,6 +88,9 @@ else
     CUDA_ARGS=""
     RUN_TESTS="--test"
 fi
+
+# Elapsed seconds on every Ninja line: the log is pipe-buffered, so line order alone can't time steps
+export NINJA_STATUS="[%f/%t %es] "
 
 ${PYTHON} ${SRC_DIR}/tools/ci_build/build.py \
     --compile_no_warning_as_error \
@@ -107,3 +110,6 @@ ${PYTHON} ${SRC_DIR}/tools/ci_build/build.py \
     --no_telemetry \
     ${RUN_TESTS} \
     ${CUDA_ARGS}
+
+# Slowest build steps, to guide future parallelism tuning
+${PYTHON} -c "import sys; e = [l.split() for l in open(sys.argv[1]) if not l.startswith('#')]; e.sort(key=lambda x: int(x[0]) - int(x[1])); [print((int(x[1]) - int(x[0])) // 1000, 's', x[3]) for x in e[:25]]" "${BUILD_DIR}/Release/.ninja_log" || true
