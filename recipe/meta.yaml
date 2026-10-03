@@ -1,5 +1,8 @@
 {% set name = "onnxruntime" %}
-{% set version = "1.24.4" %}
+# Non-empty CBC axis: an empty-string variant value ("") is ignored by conda-build
+# when passed via -m, which made the default task also build the -novec variant
+{% set suffix = "-novec" if vec_variant == "novec" else "" %}
+{% set version = "1.30.0" %}
 
 package:
   name: {{ name|lower }}{{ suffix }}-split
@@ -7,7 +10,7 @@ package:
 
 source:
   url: https://github.com/microsoft/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 0cf4d2ee4392fbb8aedaabc6b2ba11b4a680d1071fa4f75546c2289ca5b404cf
+  sha256: f6681ecbddf53898adf0cc9e8e9e84657485b84d2eca3c8aa353de6d7dd417ef
   patches:
     - patches/remove-problematic-win-test.patch  # [win]
     - patches/system-onnxruntime-overcome.patch  # [win]
@@ -17,9 +20,13 @@ source:
     # (expected +4.953, got -4.992); only affects linux-x86, passes on aarch64/osx/win
     - patches/comment-out-linux-x86-tests.patch  # [linux and x86]
     - patches/fix-problematic-gtests.patch       # [unix]
+    # New 1.28+ python tests import onnx without the skip guard their siblings have;
+    # onnx is not in the build env (from conda-forge's feedstock)
+    - patches/skip-adapter-string-tensor-test-without-onnx.patch
+    - patches/guard-onnx-import-in-autoep-test.patch
 
 build:
-  number: 2
+  number: 0
   skip: true  # [py<311]
   string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
 
@@ -32,8 +39,10 @@ requirements:
     - cmake
     - ninja-base
   host:
-    - gtest
-    - gmock
+    # Upstream's tested googletest is v1.17.0 (cmake/deps.txt); gtest 1.18 ICEs GCC 14.3 on
+    # linux-aarch64 (gtest-port.h:1171 in model_tests.cc)
+    - gtest 1.17.0  # analint: host_section_needs_exact_pinnings  # deviates from CBC 1.18.0, see above
+    - gmock 1.17.0
     # GPU requirements — pin toolkit packages to cuda_compiler_version,
     # let solver pick library versions via cuda-version constraint
     - cuda-nvcc {{ cuda_compiler_version }}        # [(ep_variant == "cuda")]
@@ -55,7 +64,8 @@ requirements:
     - optional-lite 3.5.0
     - zlib {{ zlib }}
     - numpy {{ numpy }}
-    - pybind11 2.13
+    - pybind11 3.1
+    - pybind11-abi
     - psutil
 
 outputs:
@@ -85,6 +95,9 @@ outputs:
         - '**/libcurand*.so*'                      # [linux and (ep_variant == "cuda")]
         - '**/libcusparse*.so*'                    # [linux and (ep_variant == "cuda")]
         - '**/libnvrtc*.so*'                       # [linux and (ep_variant == "cuda")]
+        # CUDA driver (CUDA::cuda_driver, newly linked by the CUDA EP vs 1.24); provided by the NVIDIA driver
+        - '**/libcuda.so*'                         # [linux and (ep_variant == "cuda")]
+        - '**/nvcuda.dll'                          # [win and (ep_variant == "cuda")]
     requirements:
       build:
         - {{ stdlib('c') }}
@@ -94,33 +107,46 @@ outputs:
       host:
         - python
         - pip
+        # CUDA libs used by the bundled CUDA EP: linked (cudart, cuBLAS, CUPTI) or dlopen'd
+        # since 1.28 (cuDNN, cuFFT); their run_exports supply the runtime deps
+        - cuda-cudart-dev {{ cuda_compiler_version }}  # [(ep_variant == "cuda")]
+        - cuda-cupti-dev {{ cuda_compiler_version }}   # [(ep_variant == "cuda")]
+        - libcublas-dev                                # [(ep_variant == "cuda")]
+        - libcudnn-dev                                 # [(ep_variant == "cuda")]
+        - libcufft-dev                                 # [(ep_variant == "cuda")]
       run:
         - python
-        - coloredlogs
         # numpy 2.0 sets the min pin to 1.19 and 2.1 sets 1.21 but upstream requires at least 1.21.6
         - numpy >=1.21.6,<3
         - packaging
-        - protobuf
+        - protobuf >=4.25.8
         - python-flatbuffers
-        - sympy
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
         - __cuda            # [(ep_variant == "cuda")]
       run_constrained:
-        - onnxruntime <0a0  # [suffix == "-novec"]
-    test:                          # [(ep_variant == "cpu")]
-      imports:                     # [(ep_variant == "cpu")]
-        - onnxruntime              # [(ep_variant == "cpu")]
-      commands:                    # [(ep_variant == "cpu")]
-        - pip check                # [(ep_variant == "cpu")]
-        - onnxruntime_test --help  # [(ep_variant == "cpu")]
-      requires:                    # [(ep_variant == "cpu")]
-        - pip                      # [(ep_variant == "cpu")]
+        - onnxruntime <0a0  # [vec_variant == "novec"]
+    test:
+      imports:
+        - onnxruntime
+      source_files:                                # [ep_variant == "cuda"]
+        - onnxruntime/test/testdata/mul_1.onnx     # [ep_variant == "cuda"]
+      commands:
+        - pip check
+        - onnxruntime_test --help
+        # CUDA tests run on GPU workers (T4): require the CUDA EP with CPU fallback disabled and
+        # check a real inference (mul_1.onnx computes Y = X * W, W = [1..6], so X = [1..6] gives squares)
+        - python -c "import numpy as np, onnxruntime as ort; o = ort.SessionOptions(); o.add_session_config_entry('session.disable_cpu_ep_fallback', '1'); s = ort.InferenceSession('onnxruntime/test/testdata/mul_1.onnx', o, providers=['CUDAExecutionProvider']); assert s.get_providers()[0] == 'CUDAExecutionProvider', s.get_providers(); x = np.arange(1, 7, dtype=np.float32).reshape(3, 2); np.testing.assert_array_equal(s.run(['Y'], dict(X=x))[0], x * x)"  # [ep_variant == "cuda"]
+      requires:
+        - pip
   - name: onnxruntime{{ suffix }}-cpp
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
       missing_dso_whitelist:
         - '**/api-ms-win-core-path-l1-1-0.dll'   # [win]
         - '**/onnxruntime_providers_shared.dll'  # [win]
+        # CUDA driver, provided by the NVIDIA driver (see the python output)
+        - '**/libcuda.so*'                       # [linux and (ep_variant == "cuda")]
+        - '**/nvcuda.dll'                        # [win and (ep_variant == "cuda")]
       run_exports:
         - {{ pin_subpackage('onnxruntime' + suffix + '-cpp', max_pin='x.x.x') }}
     script: install-cpp.sh   # [unix]
@@ -141,7 +167,7 @@ outputs:
         # gate the CUDA build to GPU hosts; unbounded — cuda-version handles the version
         - __cuda                                       # [(ep_variant == "cuda")]
       run_constrained:
-        - onnxruntime <0a0       # [suffix == "-novec"]
+        - onnxruntime <0a0       # [vec_variant == "novec"]
     test:                        # [(ep_variant == "cpu")]
       requires:                  # [(ep_variant == "cpu")]
         - {{ stdlib('c') }}      # [(ep_variant == "cpu")]
@@ -163,7 +189,7 @@ outputs:
 about:
   home: https://onnxruntime.ai
   license: MIT AND BSL-1.0
-  license_family: MIT
+  license_family: Other
   license_file: LICENSE
   summary: cross-platform, high performance ML inferencing and training accelerator
   description: |

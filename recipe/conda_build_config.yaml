@@ -1,8 +1,3 @@
-# Upstream is using some flags that are unrecognized in clang17
-c_compiler_version:        # [osx]
-  - 14                     # [osx]
-cxx_compiler_version:      # [osx]
-  - 14                     # [osx]
 # Containers from newer standards are used
 c_stdlib_version:          # [osx]
   - 13.3                   # [osx]
@@ -23,9 +18,9 @@ cuda_compiler_version:
   - 12.9
   - 13.0                           # [linux64 or aarch64 or win64]
 
-suffix:
-  - ""
-  - "-novec"
+vec_variant:
+  - vec
+  - novec
 ep_variant:
   - "cuda"                         # [linux64 or aarch64 or win64]
   - "cpu"
