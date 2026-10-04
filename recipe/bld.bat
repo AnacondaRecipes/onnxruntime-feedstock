@@ -5,10 +5,12 @@ set "DONT_VECTORIZE=OFF"
 if not "%PKG_NAME:-novec=%" == "%PKG_NAME%" set "DONT_VECTORIZE=ON"
 rem Unit tests only run for CPU variants; CUDA variants pass --skip_tests, so don't compile them
 set "BUILD_UNIT_TESTS=ON"
-set "PARALLEL_JOBS=4"
+set "PARALLEL_JOBS=%CPU_COUNT%"
+if not defined PARALLEL_JOBS set "PARALLEL_JOBS=4"
 if "%ep_variant%" == "cuda" (
     set "BUILD_UNIT_TESTS=OFF"
-    set "PARALLEL_JOBS=4"
+    rem 4 jobs peaked at ~25/63 GiB; nvcc/flash threads stay at 1
+    set "PARALLEL_JOBS=6"
 )
 rem Quote each define separately: one quoted string reaches build.py as a single -D argument
 set cmake_extra_defines="EIGEN_MPL2_ONLY=ON" "onnxruntime_USE_COREML=OFF" "onnxruntime_BUILD_SHARED_LIB=ON" "onnxruntime_BUILD_UNIT_TESTS=%BUILD_UNIT_TESTS%" "onnxruntime_DONT_VECTORIZE=%DONT_VECTORIZE%" "CMAKE_PREFIX_PATH=%LIBRARY_PREFIX:\=/%" "CMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX:\=/%" "CMAKE_DISABLE_FIND_PACKAGE_Protobuf=ON"
@@ -19,7 +21,8 @@ mkdir "%BUILD_DIR%"
 if "%ep_variant%" == "cuda" (
     set "CUDAHOSTCXX=%CXX%"
     set cmake_extra_defines=%cmake_extra_defines% "CMAKE_CUDA_COMPILER=%LIBRARY_BIN:\=/%/nvcc.exe" "CMAKE_CUDA_ARCHITECTURES=75;80;86;89;90a;100a;103;120a;121"
-    set "CUDA_ARGS=--use_cuda --cuda_home %LIBRARY_PREFIX:\=/% --cudnn_home %LIBRARY_PREFIX% --enable_cuda_profiling --nvcc_threads 1 --flash_nvcc_threads 1"
+    rem No --enable_cuda_profiling: it links CUPTI, whose Windows DLL name changes with every CUPTI release
+    set "CUDA_ARGS=--use_cuda --cuda_home %LIBRARY_PREFIX:\=/% --cudnn_home %LIBRARY_PREFIX% --nvcc_threads 1 --flash_nvcc_threads 1"
     set "RUN_TESTS=--skip_tests"
 ) else (
     set "CUDA_ARGS="

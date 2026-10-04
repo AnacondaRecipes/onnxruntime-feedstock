@@ -32,3 +32,7 @@ zip_keys:                          # [linux64 or aarch64 or win64]
     - ep_variant                   # [linux64 or aarch64 or win64]
     - c_compiler                   # [win]
     - cxx_compiler                 # [win]
+
+# cuDNN host pin (not in the aggregate CBC); the version every CUDA build resolved
+cudnn:                             # [linux64 or aarch64 or win64]
+  - 9.26.0.51                      # [linux64 or aarch64 or win64]

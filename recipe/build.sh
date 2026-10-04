@@ -57,10 +57,10 @@ fi
 if [[ "${ep_variant:-}" == "cuda" ]]; then
     export MALLOC_ARENA_MAX=2
     if [[ "${target_platform}" == "linux-aarch64" ]]; then
-        PARALLEL_JOBS=5          # SBSA GPU workers: 4 jobs peaked at 36.4/62 GiB in 1.30
+        PARALLEL_JOBS=6          # SBSA GPU workers: 5 jobs peaked at ~42/62 GiB
         NVCC_THREADS=1
     else
-        PARALLEL_JOBS=6          # x86 CUDA: 8 jobs peaked at 61/62 GiB and lost workers (claim-expired)
+        PARALLEL_JOBS=6          # x86 CUDA: 8 jobs peaked at 61/62 GiB and workers were lost (claim-expired); 6 peaks at ~54
         NVCC_THREADS=2
     fi
 else
@@ -80,9 +80,8 @@ if [[ "${ep_variant:-}" == "cuda" ]]; then
     fi
     CUDA_ARGS="--use_cuda --cudnn_home ${PREFIX} --cuda_home ${PREFIX} --enable_cuda_profiling --nvcc_threads ${NVCC_THREADS} --flash_nvcc_threads 1"
     cmake_extra_defines+=("CUDAToolkit_INCLUDE_DIR=${PREFIX}/targets/${CUDA_TARGET_DIR}/include/")
-    # Skipping all tests for CUDA variants, as they're crashing after passing
-    # this is related to CUDA Execution Provider cleanup, which fails, as CI images are missing CUDA drivers
-    # All the tests are passing locally on CUDA-enabled docker
+    # Build-time unit tests are not compiled for CUDA; the output tests run a real CUDA inference
+    # with CPU fallback disabled on the GPU test workers
     RUN_TESTS="--skip_tests"
 else
     CUDA_ARGS=""
