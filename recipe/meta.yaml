@@ -15,6 +15,8 @@ source:
     - patches/remove-problematic-win-test.patch  # [win]
     - patches/system-onnxruntime-overcome.patch  # [win]
     - patches/fix_cwd_name_on_win.patch          # [win]
+    - patches/msvc-arm64-halfgemm-test-ice.patch  # [win and arm64]
+    - patches/kleidiai-msvc-asm.patch             # [win and arm64]
     - patches/skip-fastmath-test.patch           # [aarch64]
     # GCC 14.3 x86_64 numerical bug: QDQ/NHWC transformer tests fail with sign flips
     # (expected +4.953, got -4.992); only affects linux-x86, passes on aarch64/osx/win

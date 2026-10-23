@@ -1,0 +1,20 @@
+Apply cmake/patches/kleidiai/msvc_preprocess_asm.patch (copied in by bld.bat) to
+KleidiAI on MSVC so its .S kernels are preprocessed before armasm64.
+
+--- a/cmake/external/onnxruntime_external_deps.cmake
++++ b/cmake/external/onnxruntime_external_deps.cmake
+@@ -946,7 +946,13 @@
+   # Disable the KleidiAI tests
+   set(KLEIDIAI_BUILD_TESTS  OFF)
+ 
+-  onnxruntime_fetchcontent_declare(kleidiai URL ${DEP_URL_kleidiai} URL_HASH SHA1=${DEP_SHA1_kleidiai} EXCLUDE_FROM_ALL)
++  if(MSVC AND Patch_FOUND)
++    set(ONNXRUNTIME_KLEIDIAI_PATCH_COMMAND PATCH_COMMAND ${Patch_EXECUTABLE} --binary --ignore-whitespace -p1 < ${PROJECT_SOURCE_DIR}/patches/kleidiai/msvc_preprocess_asm.patch)
++  else()
++    set(ONNXRUNTIME_KLEIDIAI_PATCH_COMMAND "")
++  endif()
++  onnxruntime_fetchcontent_declare(kleidiai URL ${DEP_URL_kleidiai} URL_HASH SHA1=${DEP_SHA1_kleidiai}
++                                   ${ONNXRUNTIME_KLEIDIAI_PATCH_COMMAND} EXCLUDE_FROM_ALL)
+   onnxruntime_fetchcontent_makeavailable(kleidiai)
+   # Fetch Qualcomm's kleidiai library
+   if(onnxruntime_USE_QMX_KLEIDIAI_COEXIST)
