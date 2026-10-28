@@ -5,18 +5,19 @@ c_stdlib_version:          # [osx]
 # CUDA builds need vs2022 (nvcc vcvars discovery fails with vs2019 on workers);
 # CPU builds use vs2019
 c_compiler:                        # [win]
-  - vs2022                         # [win64]
+  - vs2022                         # [win64 or (win and arm64)]
   - vs2019                         # [win64]
   - vs2022                         # [win and arm64]
   - vs2022                         # [win64]
 cxx_compiler:                      # [win]
-  - vs2022                         # [win64]
+  - vs2022                         # [win64 or (win and arm64)]
   - vs2019                         # [win64]
   - vs2022                         # [win and arm64]
   - vs2022                         # [win64]
 
 cuda_compiler_version:
   - 12.9                           # [linux64 or aarch64 or win64]
+  - 13.4                           # [win and arm64]
   - 12.9
   - 13.0                           # [linux64 or aarch64 or win64]
 
@@ -24,17 +25,17 @@ vec_variant:
   - vec
   - novec
 ep_variant:
-  - "cuda"                         # [linux64 or aarch64 or win64]
+  - "cuda"                         # [linux64 or aarch64 or win64 or (win and arm64)]
   - "cpu"
   - "cuda"                         # [linux64 or aarch64 or win64]
 
-zip_keys:                          # [linux64 or aarch64 or win64]
-  -                                # [linux64 or aarch64 or win64]
-    - cuda_compiler_version        # [linux64 or aarch64 or win64]
-    - ep_variant                   # [linux64 or aarch64 or win64]
-    - c_compiler                   # [win64]
-    - cxx_compiler                 # [win64]
+zip_keys:                          # [linux64 or aarch64 or win64 or (win and arm64)]
+  -                                # [linux64 or aarch64 or win64 or (win and arm64)]
+    - cuda_compiler_version        # [linux64 or aarch64 or win64 or (win and arm64)]
+    - ep_variant                   # [linux64 or aarch64 or win64 or (win and arm64)]
+    - c_compiler                   # [win64 or (win and arm64)]
+    - cxx_compiler                 # [win64 or (win and arm64)]
 
 # cuDNN host pin (not in the aggregate CBC); the version every CUDA build resolved
-cudnn:                             # [linux64 or aarch64 or win64]
-  - 9.26.0.51                      # [linux64 or aarch64 or win64]
+cudnn:                             # [linux64 or aarch64 or win64 or (win and arm64)]
+  - 9.26.0.51                      # [linux64 or aarch64 or win64 or (win and arm64)]
