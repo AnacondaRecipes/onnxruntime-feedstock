@@ -28,7 +28,7 @@ source:
     - patches/guard-onnx-import-in-autoep-test.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [py<311]
   string: py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_{{ ep_variant }}
 
