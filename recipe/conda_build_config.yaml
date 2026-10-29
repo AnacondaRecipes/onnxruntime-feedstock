@@ -5,13 +5,15 @@ c_stdlib_version:          # [osx]
 # CUDA builds need vs2022 (nvcc vcvars discovery fails with vs2019 on workers);
 # CPU builds use vs2019
 c_compiler:                        # [win]
-  - vs2022                         # [win]
-  - vs2019                         # [win]
-  - vs2022                         # [win]
+  - vs2022                         # [win64]
+  - vs2019                         # [win64]
+  - vs2022                         # [win and arm64]
+  - vs2022                         # [win64]
 cxx_compiler:                      # [win]
-  - vs2022                         # [win]
-  - vs2019                         # [win]
-  - vs2022                         # [win]
+  - vs2022                         # [win64]
+  - vs2019                         # [win64]
+  - vs2022                         # [win and arm64]
+  - vs2022                         # [win64]
 
 cuda_compiler_version:
   - 12.9                           # [linux64 or aarch64 or win64]
@@ -30,8 +32,8 @@ zip_keys:                          # [linux64 or aarch64 or win64]
   -                                # [linux64 or aarch64 or win64]
     - cuda_compiler_version        # [linux64 or aarch64 or win64]
     - ep_variant                   # [linux64 or aarch64 or win64]
-    - c_compiler                   # [win]
-    - cxx_compiler                 # [win]
+    - c_compiler                   # [win64]
+    - cxx_compiler                 # [win64]
 
 # cuDNN host pin (not in the aggregate CBC); the version every CUDA build resolved
 cudnn:                             # [linux64 or aarch64 or win64]

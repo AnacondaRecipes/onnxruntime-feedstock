@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -527,5 +527,12 @@
+     list(FILTER KLEIDIAI_FILES_ASM INCLUDE REGEX "^.*\.S$")
+ 
+     set_source_files_properties(${KLEIDIAI_FILES_ASM} PROPERTIES LANGUAGE ASM_MARMASM)
++    # armasm64 neither runs the C preprocessor these .S files rely on nor accepts /arch:
++    # preprocess with cl first, then assemble the result
++    set_source_files_properties(${KLEIDIAI_FILES_ASM} PROPERTIES COMPILE_OPTIONS "")
++    set(CMAKE_ASM_MARMASM_COMPILE_OBJECT
++        "<CMAKE_C_COMPILER> /nologo /EP /P /TC <INCLUDES> /Fi<OBJECT>.asm <SOURCE>"
++        "<CMAKE_ASM_MARMASM_COMPILER> -nologo -o <OBJECT> <OBJECT>.asm"
++    )
+ endif()
+ 

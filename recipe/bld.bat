@@ -29,6 +29,12 @@ if "%ep_variant%" == "cuda" (
     set "RUN_TESTS=--test"
 )
 
+rem Applied to the fetched KleidiAI by patches/kleidiai-msvc-asm.patch
+if "%target_platform%" == "win-arm64" (
+    if not exist "%SRC_DIR%\cmake\patches\kleidiai" mkdir "%SRC_DIR%\cmake\patches\kleidiai"
+    copy /y "%RECIPE_DIR%\patches\kleidiai\msvc_preprocess_asm.patch" "%SRC_DIR%\cmake\patches\kleidiai\" || exit 1
+)
+
 rem Elapsed seconds on every Ninja line: the log is pipe-buffered, so line order alone can't time steps
 set "NINJA_STATUS=[%%f/%%t %%es] "
 
